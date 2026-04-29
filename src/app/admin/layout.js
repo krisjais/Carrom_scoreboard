@@ -9,7 +9,7 @@ export default function AdminLayout({ children }) {
   if (isLogin) return <>{children}</>;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0A0A0F', display: 'flex' }}>
+    <div style={{ minHeight: '100vh', background: '#0B1628', display: 'flex' }}>
       <AdminSidebar />
       {/* Spacer = 300px sidebar width */}
       <div className="admin-spacer" style={{ flexShrink: 0, width: '300px', display: 'none' }} />

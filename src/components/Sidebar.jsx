@@ -25,22 +25,22 @@ export default function Sidebar() {
       {/* Desktop */}
       <aside
         className="hidden lg:flex flex-col fixed top-0 left-0 bottom-0 z-40"
-        style={{ width: SIDEBAR_W + 'px', minWidth: SIDEBAR_W + 'px', background: '#111118', borderRight: '1px solid #1E1E2A' }}
+        style={{ width: SIDEBAR_W + 'px', minWidth: SIDEBAR_W + 'px', background: '#0F1E38', borderRight: '1px solid #1B3A6B' }}
       >
         {/* Brand */}
-        <div className="flex items-center gap-4 px-6 py-6" style={{ borderBottom: '1px solid #1E1E2A' }}>
+        <div className="flex items-center gap-4 px-6 py-6" style={{ borderBottom: '1px solid #1B3A6B' }}>
           <div className="relative flex-shrink-0" style={{ width: '64px', height: '64px' }}>
             <Image src="/logo.png" alt="NIT Carrom" fill style={{ objectFit: 'contain' }} priority />
           </div>
           <div className="min-w-0">
-            <p className="text-[18px] font-black leading-tight tracking-wide uppercase" style={{ color: '#F4F4F6' }}>Carrom</p>
-            <p className="text-[12px] font-semibold mt-0.5 uppercase tracking-wider" style={{ color: '#4A4A5E' }}>NIT Championship</p>
+            <p className="text-[18px] font-black leading-tight tracking-wide uppercase" style={{ color: '#E8C96A' }}>Carrom</p>
+            <p className="text-[12px] font-semibold mt-0.5 uppercase tracking-wider" style={{ color: '#3D5A80' }}>NIT Championship</p>
           </div>
         </div>
 
         {/* Nav */}
         <nav className="flex-1 px-4 py-5 space-y-1 overflow-y-auto">
-          <p className="text-[11px] font-semibold uppercase tracking-widest px-3 mb-4" style={{ color: '#2A2A3A' }}>
+          <p className="text-[11px] font-semibold uppercase tracking-widest px-3 mb-4" style={{ color: '#1B3A6B' }}>
             Menu
           </p>
           {navItems.map(({ href, label, icon: Icon }) => {
@@ -85,25 +85,25 @@ export default function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="px-4 py-5" style={{ borderTop: '1px solid #1E1E2A' }}>
+        <div className="px-4 py-5" style={{ borderTop: '1px solid #1B3A6B' }}>
           <Link
             href="/admin"
             className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl no-underline transition-all"
-            style={{ color: '#3A3A52', fontSize: '14px', fontWeight: 500 }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = '#6B6B85'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#3A3A52'; }}
+            style={{ color: '#3D5A80', fontSize: '14px', fontWeight: 500 }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,168,76,0.06)'; e.currentTarget.style.color = '#8BA4C0'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#3D5A80'; }}
           >
             <Settings size={18} strokeWidth={2} style={{ flexShrink: 0 }} />
             <span>Admin Panel</span>
           </Link>
-          <p className="text-[11px] px-4 mt-3" style={{ color: '#2A2A3A' }}>v1.0 · College Tournament</p>
+          <p className="text-[11px] px-4 mt-3" style={{ color: '#1B3A6B' }}>v1.0 · College Tournament</p>
         </div>
       </aside>
 
       {/* Mobile bottom nav */}
       <nav
         className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center py-2 px-1"
-        style={{ background: '#111118', borderTop: '1px solid #1E1E2A' }}
+        style={{ background: '#0F1E38', borderTop: '1px solid #1B3A6B' }}
       >
         {navItems.slice(0, 4).map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
@@ -112,7 +112,7 @@ export default function Sidebar() {
               key={href}
               href={href}
               className="flex flex-col items-center gap-1 px-2 py-2 rounded-lg no-underline transition-colors"
-              style={{ color: active ? '#818CF8' : '#3A3A52', fontSize: '9px', fontWeight: active ? 600 : 500 }}
+              style={{ color: active ? '#E8C96A' : '#3D5A80', fontSize: '9px', fontWeight: active ? 600 : 500 }}
             >
               <Icon size={19} strokeWidth={active ? 2.5 : 1.8} />
               <span>{label}</span>
