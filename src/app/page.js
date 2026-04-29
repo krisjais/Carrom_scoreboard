@@ -10,6 +10,9 @@ export default function LandingPage() {
 
       {/* ── Global background layers ── */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+
+        {/* Carrom pieces physics — full screen background */}
+        <CarromBoard />
         {/* Deep radial glow — top center gold */}
         <div style={{
           position: 'absolute', top: '-20%', left: '50%', transform: 'translateX(-50%)',
@@ -102,9 +105,6 @@ export default function LandingPage() {
 
       {/* ── Hero ── */}
       <section className="relative flex flex-col items-center text-center px-6 pt-20 pb-20 lg:pt-28 lg:pb-28" style={{ zIndex: 1 }}>
-
-        {/* ── Live carrom physics simulation ── */}
-        <CarromBoard />
         <div style={{
           position: 'absolute', top: '60px', left: '50%', transform: 'translateX(-50%)',
           width: '320px', height: '320px',
@@ -129,11 +129,11 @@ export default function LandingPage() {
         </div>
 
         {/* Logo with glow */}
-        <div className="relative mb-8" style={{ width: '180px', height: '180px' }}>
+        <div className="relative mb-8" style={{ width: '220px', height: '220px' }}>
           <div style={{
-            position: 'absolute', inset: '-20px',
-            background: 'radial-gradient(circle, rgba(201,168,76,0.2) 0%, transparent 70%)',
-            filter: 'blur(20px)',
+            position: 'absolute', inset: '-24px',
+            background: 'radial-gradient(circle, rgba(201,168,76,0.22) 0%, transparent 70%)',
+            filter: 'blur(22px)',
             borderRadius: '50%',
           }} />
           <Image src="/logo.png" alt="NIT Carrom Championship" fill style={{ objectFit: 'contain', position: 'relative', zIndex: 1 }} priority />

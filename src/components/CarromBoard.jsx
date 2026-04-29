@@ -228,7 +228,7 @@ export default function CarromBoard() {
         height: '100%',
         pointerEvents: 'none',
         zIndex: 0,
-        opacity: 0.55,
+        opacity: 0.35,
       }}
     />
   );
