@@ -6,9 +6,9 @@ import { LayoutDashboard, Users, Swords, LogOut, ShieldCheck, ChevronRight } fro
 import { useRouter } from 'next/navigation';
 
 const navItems = [
-  { href: '/admin',         label: 'Dashboard', icon: LayoutDashboard, desc: 'Overview & stats' },
-  { href: '/admin#players', label: 'Players',   icon: Users,           desc: 'Manage participants' },
-  { href: '/admin#matches', label: 'Matches',   icon: Swords,          desc: 'Generate & manage' },
+  { href: '/admin',          label: 'Dashboard', icon: LayoutDashboard, desc: 'Overview & stats' },
+  { href: '/admin/players',  label: 'Players',   icon: Users,           desc: 'Manage participants' },
+  { href: '/admin/matches',  label: 'Matches',   icon: Swords,          desc: 'Generate & manage' },
 ];
 
 const SIDEBAR_W = 300;
@@ -58,7 +58,7 @@ export default function AdminSidebar() {
             Admin Menu
           </p>
           {navItems.map(({ href, label, icon: Icon, desc }) => {
-            const active = pathname === '/admin' && href === '/admin';
+            const active = pathname === href;
             return (
               <Link
                 key={href}
@@ -156,21 +156,17 @@ export default function AdminSidebar() {
           <span>Dashboard</span>
         </Link>
 
-        <Link
-          href="/admin#players"
+        <Link href="/admin/players"
           className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg no-underline"
-          style={{ color: '#3A3A52', fontSize: '9px' }}
-        >
-          <Users size={18} strokeWidth={1.8} />
+          style={{ color: pathname === '/admin/players' ? '#818CF8' : '#3A3A52', fontSize: '9px' }}>
+          <Users size={18} strokeWidth={pathname === '/admin/players' ? 2.5 : 1.8} />
           <span>Players</span>
         </Link>
 
-        <Link
-          href="/admin#matches"
+        <Link href="/admin/matches"
           className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg no-underline"
-          style={{ color: '#3A3A52', fontSize: '9px' }}
-        >
-          <Swords size={18} strokeWidth={1.8} />
+          style={{ color: pathname === '/admin/matches' ? '#818CF8' : '#3A3A52', fontSize: '9px' }}>
+          <Swords size={18} strokeWidth={pathname === '/admin/matches' ? 2.5 : 1.8} />
           <span>Matches</span>
         </Link>
 
