@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Trophy, Users, Zap, ChevronRight, Shield, LayoutDashboard, Star } from 'lucide-react';
+import { Trophy, Users, Zap, ChevronRight, Shield, LayoutDashboard, Star, User, Shuffle } from 'lucide-react';
 import CarromBoard from '@/components/CarromBoard';
 
 export default function LandingPage() {
@@ -277,9 +277,9 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
-              { href: '/carrom/single', label: 'Singles', emoji: '🎯', desc: 'Individual 1v1 matches, grouped by gender. Male and Female categories compete separately.', color: '#60A5FA' },
-              { href: '/carrom/double', label: 'Doubles', emoji: '🤝', desc: 'Open category — any 2 players can form a team. No gender restrictions.', color: '#C9A84C' },
-              { href: '/carrom/mixed', label: 'Mixed Doubles', emoji: '💑', desc: 'Teams must consist of exactly 1 Male and 1 Female player.', color: '#F472B6' },
+              { href: '/carrom/single', label: 'Singles', icon: <User size={28} />, desc: 'Individual 1v1 matches, grouped by gender. Male and Female categories compete separately.', color: '#60A5FA' },
+              { href: '/carrom/double', label: 'Doubles', icon: <Users size={28} />, desc: 'Open category — any 2 players can form a team. No gender restrictions.', color: '#C9A84C' },
+              { href: '/carrom/mixed', label: 'Mixed Doubles', icon: <Shuffle size={28} />, desc: 'Teams must consist of exactly 1 Male and 1 Female player.', color: '#F472B6' },
             ].map(c => (
               <Link key={c.label} href={c.href}
                 className="flex flex-col p-6 rounded-2xl no-underline transition-all duration-200"
@@ -296,7 +296,10 @@ export default function LandingPage() {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = 'none';
                 }}>
-                <span className="text-[36px] mb-4">{c.emoji}</span>
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
+                  style={{ background: `${c.color}14`, border: `1px solid ${c.color}28` }}>
+                  <span style={{ color: c.color }}>{c.icon}</span>
+                </div>
                 <p className="text-[18px] font-bold mb-2" style={{ color: c.color }}>{c.label}</p>
                 <p className="text-[13px] leading-relaxed flex-1" style={{ color: '#5A7A9A' }}>{c.desc}</p>
                 <div className="flex items-center gap-1 mt-5 text-[12px] font-semibold" style={{ color: c.color }}>
