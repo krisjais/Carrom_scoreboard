@@ -2,8 +2,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminLogin } from '@/lib/api';
-import { Lock, Eye, EyeOff } from 'lucide-react';
+import { Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
@@ -79,6 +80,20 @@ export default function AdminLoginPage() {
         <p className="text-center text-[11px] mt-5" style={{ color: '#2A2A3A' }}>
           Restricted access · Authorised personnel only
         </p>
+
+        {/* Back to home */}
+        <div className="flex justify-center mt-4">
+          <Link
+            href="/"
+            className="flex items-center gap-1.5 no-underline text-[12px] font-medium transition-colors"
+            style={{ color: '#3A3A52' }}
+            onMouseEnter={e => e.currentTarget.style.color = '#C9A84C'}
+            onMouseLeave={e => e.currentTarget.style.color = '#3A3A52'}
+          >
+            <ArrowLeft size={13} />
+            Back to Home
+          </Link>
+        </div>
       </div>
     </div>
   );
