@@ -7,6 +7,39 @@ export default function LandingPage() {
   return (
     <div style={{ minHeight: '100vh', background: '#060C18', color: '#F0F4FF', fontFamily: 'Inter, sans-serif', overflowX: 'hidden' }}>
 
+      {/* ── Floating carrom pieces animation styles ── */}
+      <style>{`
+        @keyframes floatA {
+          0%   { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+          33%  { transform: translateY(-28px) rotate(120deg); opacity: 1; }
+          66%  { transform: translateY(-12px) rotate(240deg); opacity: 0.8; }
+          100% { transform: translateY(0px) rotate(360deg); opacity: 0.7; }
+        }
+        @keyframes floatB {
+          0%   { transform: translateY(0px) rotate(0deg) scale(1); opacity: 0.6; }
+          50%  { transform: translateY(-36px) rotate(180deg) scale(1.1); opacity: 0.9; }
+          100% { transform: translateY(0px) rotate(360deg) scale(1); opacity: 0.6; }
+        }
+        @keyframes floatC {
+          0%   { transform: translateY(0px) translateX(0px) rotate(0deg); opacity: 0.5; }
+          25%  { transform: translateY(-20px) translateX(10px) rotate(90deg); opacity: 0.8; }
+          75%  { transform: translateY(-30px) translateX(-8px) rotate(270deg); opacity: 0.7; }
+          100% { transform: translateY(0px) translateX(0px) rotate(360deg); opacity: 0.5; }
+        }
+        @keyframes floatD {
+          0%   { transform: translateY(0px) rotate(0deg); opacity: 0.4; }
+          40%  { transform: translateY(-22px) rotate(144deg); opacity: 0.75; }
+          100% { transform: translateY(0px) rotate(360deg); opacity: 0.4; }
+        }
+        @keyframes drift {
+          0%   { transform: translateX(0px) translateY(0px) rotate(0deg); }
+          25%  { transform: translateX(15px) translateY(-20px) rotate(90deg); }
+          50%  { transform: translateX(0px) translateY(-35px) rotate(180deg); }
+          75%  { transform: translateX(-15px) translateY(-20px) rotate(270deg); }
+          100% { transform: translateX(0px) translateY(0px) rotate(360deg); }
+        }
+      `}</style>
+
       {/* ── Global background layers ── */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
         {/* Deep radial glow — top center gold */}
@@ -101,6 +134,45 @@ export default function LandingPage() {
 
       {/* ── Hero ── */}
       <section className="relative flex flex-col items-center text-center px-6 pt-20 pb-20 lg:pt-28 lg:pb-28" style={{ zIndex: 1 }}>
+
+        {/* ── Floating carrom pieces ── */}
+        {/* Black coin — top left */}
+        <div style={{ position: 'absolute', top: '12%', left: '8%', animation: 'floatA 6s ease-in-out infinite', zIndex: 0 }}>
+          <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'radial-gradient(circle at 35% 35%, #4A4A4A, #111)', border: '2px solid #333', boxShadow: '0 4px 16px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1)' }} />
+        </div>
+        {/* White coin — top right */}
+        <div style={{ position: 'absolute', top: '8%', right: '10%', animation: 'floatB 7s ease-in-out infinite 1s', zIndex: 0 }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'radial-gradient(circle at 35% 35%, #E8E0D0, #B8B0A0)', border: '2px solid #C8C0B0', boxShadow: '0 4px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.4)' }} />
+        </div>
+        {/* Striker — center left (larger, gold-rimmed) */}
+        <div style={{ position: 'absolute', top: '35%', left: '5%', animation: 'floatC 8s ease-in-out infinite 0.5s', zIndex: 0 }}>
+          <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'radial-gradient(circle at 35% 30%, #F5E6C8, #C9A84C 40%, #8B6914)', border: '3px solid #E8C96A', boxShadow: '0 6px 24px rgba(201,168,76,0.4), inset 0 2px 0 rgba(255,255,255,0.3)' }}>
+            {/* Striker inner ring */}
+            <div style={{ position: 'absolute', inset: '6px', borderRadius: '50%', border: '1px solid rgba(255,255,255,0.2)' }} />
+          </div>
+        </div>
+        {/* Black coin — right side */}
+        <div style={{ position: 'absolute', top: '45%', right: '6%', animation: 'floatD 5.5s ease-in-out infinite 2s', zIndex: 0 }}>
+          <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'radial-gradient(circle at 35% 35%, #3A3A3A, #0A0A0A)', border: '2px solid #2A2A2A', boxShadow: '0 4px 12px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08)' }} />
+        </div>
+        {/* Red queen — center right */}
+        <div style={{ position: 'absolute', top: '20%', right: '14%', animation: 'drift 9s ease-in-out infinite 1.5s', zIndex: 0 }}>
+          <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'radial-gradient(circle at 35% 35%, #FF6B6B, #CC2222)', border: '2px solid #FF4444', boxShadow: '0 4px 16px rgba(239,68,68,0.5), inset 0 1px 0 rgba(255,255,255,0.2)' }} />
+        </div>
+        {/* White coin — bottom left */}
+        <div style={{ position: 'absolute', bottom: '20%', left: '10%', animation: 'floatB 7.5s ease-in-out infinite 3s', zIndex: 0 }}>
+          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'radial-gradient(circle at 35% 35%, #F0E8D8, #C0B8A8)', border: '2px solid #D0C8B8', boxShadow: '0 3px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.35)' }} />
+        </div>
+        {/* Black coin — bottom right */}
+        <div style={{ position: 'absolute', bottom: '25%', right: '8%', animation: 'floatA 6.5s ease-in-out infinite 0.8s', zIndex: 0 }}>
+          <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'radial-gradient(circle at 35% 35%, #444, #111)', border: '2px solid #333', boxShadow: '0 3px 10px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.07)' }} />
+        </div>
+        {/* Small striker — far left */}
+        <div style={{ position: 'absolute', bottom: '35%', left: '3%', animation: 'drift 10s ease-in-out infinite 4s', zIndex: 0 }}>
+          <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'radial-gradient(circle at 35% 30%, #EED9A0, #B8922A 40%, #7A5A10)', border: '2px solid #C9A84C', boxShadow: '0 4px 18px rgba(201,168,76,0.3), inset 0 1px 0 rgba(255,255,255,0.25)' }}>
+            <div style={{ position: 'absolute', inset: '5px', borderRadius: '50%', border: '1px solid rgba(255,255,255,0.15)' }} />
+          </div>
+        </div>
 
         {/* Decorative ring behind logo */}
         <div style={{
