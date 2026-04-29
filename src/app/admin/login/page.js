@@ -48,7 +48,8 @@ export default function AdminLoginPage() {
               <input
                 type={show ? 'text' : 'password'}
                 placeholder="Admin password"
-                className="input-field pl-10 pr-10"
+                className="input-field"
+                style={{ paddingLeft: '38px', paddingRight: '38px' }}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
@@ -56,7 +57,7 @@ export default function AdminLoginPage() {
               />
               <button type="button" onClick={() => setShow(!show)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                style={{ color: '#4A4A5E' }}
+                style={{ color: '#4A4A5E', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
                 onMouseEnter={e => e.currentTarget.style.color = '#8B8B9E'}
                 onMouseLeave={e => e.currentTarget.style.color = '#4A4A5E'}>
                 {show ? <EyeOff size={14} /> : <Eye size={14} />}
