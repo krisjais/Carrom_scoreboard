@@ -72,14 +72,14 @@ export default function Sidebar() {
           const active = pathname === href;
           return (
             <Link key={href} href={href} className="flex flex-col items-center gap-1 px-2 py-2 rounded-lg no-underline"
-              style={{ color: active ? '#E8C96A' : '#2E4A6A', fontSize: '9px', fontWeight: active ? 600 : 400 }}>
+              style={{ color: active ? '#E8C96A' : '#6B8FAD', fontSize: '9px', fontWeight: active ? 600 : 400 }}>
               <Icon size={19} strokeWidth={active ? 2.5 : 1.8} />
               <span>{label}</span>
             </Link>
           );
         })}
         <Link href="/admin" className="flex flex-col items-center gap-1 px-2 py-2 rounded-lg no-underline"
-          style={{ color: pathname.startsWith('/admin') ? '#E8C96A' : '#2E4A6A', fontSize: '9px' }}>
+          style={{ color: pathname.startsWith('/admin') ? '#E8C96A' : '#6B8FAD', fontSize: '9px' }}>
           <Settings size={19} strokeWidth={1.8} />
           <span>Admin</span>
         </Link>

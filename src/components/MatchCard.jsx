@@ -27,7 +27,7 @@ export default function MatchCard({ match, onUpdateResult, showActions = false }
           )}
           {match.status}
         </span>
-        <span className="text-[11px] tabular-nums" style={{ color: '#4A4A5E' }}>
+        <span className="text-[11px] tabular-nums" style={{ color: '#6B8FAD' }}>
           R{match.round} · M{match.bracketPosition + 1}
         </span>
       </div>
@@ -56,7 +56,7 @@ export default function MatchCard({ match, onUpdateResult, showActions = false }
         {/* VS */}
         <div
           className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0"
-          style={{ background: '#1F1F2E', color: '#4A4A5E' }}
+          style={{ background: '#1A2A3A', color: '#6B8FAD' }}
         >
           VS
         </div>
@@ -70,7 +70,7 @@ export default function MatchCard({ match, onUpdateResult, showActions = false }
           }}
         >
           {match.isBye ? (
-            <p className="text-[12px] italic" style={{ color: '#4A4A5E' }}>BYE</p>
+            <p className="text-[12px] italic" style={{ color: '#6B8FAD' }}>BYE</p>
           ) : (
             <>
               {isWinnerB && <Crown size={10} className="mx-auto mb-1" style={{ color: '#4ADE80' }} />}
@@ -89,7 +89,7 @@ export default function MatchCard({ match, onUpdateResult, showActions = false }
 
       {/* Footer */}
       <div className="mt-3 pt-3 flex items-center justify-between" style={{ borderTop: '1px solid #1F1F2E' }}>
-        <span className="text-[11px] flex items-center gap-1.5" style={{ color: '#4A4A5E' }}>
+        <span className="text-[11px] flex items-center gap-1.5" style={{ color: '#6B8FAD' }}>
           {match.matchType === 'single' ? <><User size={11} /> Singles</>
             : match.matchType === 'double' ? <><Users size={11} /> Doubles</>
             : <><HeartHandshake size={11} /> Mixed</>}
