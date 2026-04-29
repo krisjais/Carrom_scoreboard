@@ -144,22 +144,51 @@ export default function AdminSidebar() {
 
       {/* Mobile bottom nav */}
       <nav
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center py-2 px-2"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center py-1 px-1"
         style={{ background: '#111118', borderTop: '1px solid #1E1E2A' }}
       >
-        <Link href="/admin" className="flex flex-col items-center gap-1 px-4 py-2 rounded-lg no-underline"
-          style={{ color: pathname === '/admin' ? '#818CF8' : '#3A3A52', fontSize: '10px' }}>
-          <LayoutDashboard size={19} />
+        <Link
+          href="/admin"
+          className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg no-underline"
+          style={{ color: pathname === '/admin' ? '#818CF8' : '#3A3A52', fontSize: '9px', fontWeight: pathname === '/admin' ? 600 : 400 }}
+        >
+          <LayoutDashboard size={18} strokeWidth={pathname === '/admin' ? 2.5 : 1.8} />
           <span>Dashboard</span>
         </Link>
-        <Link href="/carrom" className="flex flex-col items-center gap-1 px-4 py-2 rounded-lg no-underline"
-          style={{ color: '#3A3A52', fontSize: '10px' }}>
-          <Users size={19} />
+
+        <Link
+          href="/admin#players"
+          className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg no-underline"
+          style={{ color: '#3A3A52', fontSize: '9px' }}
+        >
+          <Users size={18} strokeWidth={1.8} />
+          <span>Players</span>
+        </Link>
+
+        <Link
+          href="/admin#matches"
+          className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg no-underline"
+          style={{ color: '#3A3A52', fontSize: '9px' }}
+        >
+          <Swords size={18} strokeWidth={1.8} />
+          <span>Matches</span>
+        </Link>
+
+        <Link
+          href="/carrom"
+          className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg no-underline"
+          style={{ color: '#3A3A52', fontSize: '9px' }}
+        >
+          <LayoutDashboard size={18} strokeWidth={1.8} />
           <span>User Site</span>
         </Link>
-        <button onClick={handleLogout} className="flex flex-col items-center gap-1 px-4 py-2 rounded-lg"
-          style={{ color: '#3A3A52', fontSize: '10px', background: 'none', border: 'none', cursor: 'pointer' }}>
-          <LogOut size={19} />
+
+        <button
+          onClick={handleLogout}
+          className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg"
+          style={{ color: '#3A3A52', fontSize: '9px', background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          <LogOut size={18} strokeWidth={1.8} />
           <span>Sign Out</span>
         </button>
       </nav>

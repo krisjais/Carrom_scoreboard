@@ -105,20 +105,28 @@ export default function Sidebar() {
         className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center py-2 px-1"
         style={{ background: '#111118', borderTop: '1px solid #1E1E2A' }}
       >
-        {navItems.map(({ href, label, icon: Icon }) => {
+        {navItems.slice(0, 4).map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
           return (
             <Link
               key={href}
               href={href}
-              className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg no-underline transition-colors"
-              style={{ color: active ? '#818CF8' : '#3A3A52', fontSize: '10px', fontWeight: active ? 600 : 500 }}
+              className="flex flex-col items-center gap-1 px-2 py-2 rounded-lg no-underline transition-colors"
+              style={{ color: active ? '#818CF8' : '#3A3A52', fontSize: '9px', fontWeight: active ? 600 : 500 }}
             >
-              <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
+              <Icon size={19} strokeWidth={active ? 2.5 : 1.8} />
               <span>{label}</span>
             </Link>
           );
         })}
+        <Link
+          href="/admin"
+          className="flex flex-col items-center gap-1 px-2 py-2 rounded-lg no-underline transition-colors"
+          style={{ color: pathname.startsWith('/admin') ? '#818CF8' : '#3A3A52', fontSize: '9px', fontWeight: pathname.startsWith('/admin') ? 600 : 500 }}
+        >
+          <Settings size={19} strokeWidth={pathname.startsWith('/admin') ? 2.5 : 1.8} />
+          <span>Admin</span>
+        </Link>
       </nav>
     </>
   );
