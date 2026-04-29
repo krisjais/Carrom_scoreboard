@@ -3,7 +3,7 @@ import Sidebar from "@/components/Sidebar";
 
 export default function CarromLayout({ children }) {
   return (
-    <div style={{ minHeight: '100vh', background: '#0B1628', display: 'flex' }}>
+    <div style={{ minHeight: '100vh', background: '#080F1C', display: 'flex' }}>
       <Sidebar />
       {/* Spacer = 300px sidebar width, hidden on mobile */}
       <div className="sidebar-spacer" style={{ flexShrink: 0, width: '300px', display: 'none' }} />

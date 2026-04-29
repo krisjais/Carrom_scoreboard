@@ -2,10 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import {
-  LayoutDashboard, User, Users, HeartHandshake,
-  Trophy, Settings, ChevronRight
-} from 'lucide-react';
+import { LayoutDashboard, User, Users, HeartHandshake, Trophy, Settings, ChevronRight } from 'lucide-react';
 
 const navItems = [
   { href: '/carrom',             label: 'Dashboard',   icon: LayoutDashboard },
@@ -15,116 +12,75 @@ const navItems = [
   { href: '/carrom/leaderboard', label: 'Leaderboard', icon: Trophy },
 ];
 
-const SIDEBAR_W = 300;
+const W = 300;
 
 export default function Sidebar() {
   const pathname = usePathname();
 
   return (
     <>
-      {/* Desktop */}
-      <aside
-        className="hidden lg:flex flex-col fixed top-0 left-0 bottom-0 z-40"
-        style={{ width: SIDEBAR_W + 'px', minWidth: SIDEBAR_W + 'px', background: '#0F1E38', borderRight: '1px solid #1B3A6B' }}
-      >
+      <aside className="hidden lg:flex flex-col fixed top-0 left-0 bottom-0 z-40"
+        style={{ width: W + 'px', minWidth: W + 'px', background: '#0A1525', borderRight: '1px solid rgba(201,168,76,0.12)' }}>
+
         {/* Brand */}
-        <div className="flex items-center gap-4 px-6 py-6" style={{ borderBottom: '1px solid #1B3A6B' }}>
-          <div className="relative flex-shrink-0" style={{ width: '64px', height: '64px' }}>
+        <div className="flex items-center gap-4 px-6 py-6" style={{ borderBottom: '1px solid rgba(201,168,76,0.1)' }}>
+          <div className="relative flex-shrink-0" style={{ width: '52px', height: '52px' }}>
             <Image src="/logo.png" alt="NIT Carrom" fill style={{ objectFit: 'contain' }} priority />
           </div>
-          <div className="min-w-0">
-            <p className="text-[18px] font-black leading-tight tracking-wide uppercase" style={{ color: '#E8C96A' }}>Carrom</p>
-            <p className="text-[12px] font-semibold mt-0.5 uppercase tracking-wider" style={{ color: '#3D5A80' }}>NIT Championship</p>
+          <div>
+            <p className="text-[17px] font-black uppercase tracking-wide leading-tight" style={{ color: '#E8C96A' }}>Carrom</p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest mt-0.5" style={{ color: '#2E4A6A' }}>NIT Championship</p>
           </div>
         </div>
 
         {/* Nav */}
         <nav className="flex-1 px-4 py-5 space-y-1 overflow-y-auto">
-          <p className="text-[11px] font-semibold uppercase tracking-widest px-3 mb-4" style={{ color: '#1B3A6B' }}>
-            Menu
-          </p>
+          <p className="text-[10px] font-bold uppercase tracking-widest px-3 mb-4" style={{ color: '#1E3A5A' }}>Menu</p>
           {navItems.map(({ href, label, icon: Icon }) => {
             const active = pathname === href;
             return (
-              <Link
-                key={href}
-                href={href}
-                className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl no-underline transition-all duration-150 relative"
-                style={{
-                  background: active ? 'rgba(99,102,241,0.1)' : 'transparent',
-                  color: active ? '#818CF8' : '#6B6B85',
-                  border: active ? '1px solid rgba(99,102,241,0.15)' : '1px solid transparent',
-                  fontWeight: active ? 600 : 500,
-                  fontSize: '15px',
-                }}
-                onMouseEnter={e => {
-                  if (!active) {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-                    e.currentTarget.style.color = '#C4C4D4';
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (!active) {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = '#6B6B85';
-                  }
-                }}
-              >
-                {active && (
-                  <span
-                    className="absolute left-0 top-1/2 -translate-y-1/2 rounded-r"
-                    style={{ width: '3px', height: '55%', background: '#6366F1' }}
-                  />
-                )}
-                <Icon size={19} strokeWidth={active ? 2.5 : 2} style={{ flexShrink: 0 }} />
-                <span className="flex-1">{label}</span>
-                {active && <ChevronRight size={15} style={{ color: '#6366F1', opacity: 0.6 }} />}
+              <Link key={href} href={href} className={`nav-link ${active ? 'active' : ''}`}>
+                {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 rounded-r" style={{ width: '3px', height: '55%', background: 'linear-gradient(180deg, #C9A84C, #E8C96A)' }} />}
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: active ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.04)', border: active ? '1px solid rgba(201,168,76,0.3)' : '1px solid rgba(255,255,255,0.06)' }}>
+                  <Icon size={15} strokeWidth={active ? 2.5 : 2} style={{ color: active ? '#E8C96A' : '#2E4A6A' }} />
+                </div>
+                <span className="flex-1 text-[14px]">{label}</span>
+                {active && <ChevronRight size={14} style={{ color: 'rgba(201,168,76,0.5)' }} />}
               </Link>
             );
           })}
         </nav>
 
         {/* Footer */}
-        <div className="px-4 py-5" style={{ borderTop: '1px solid #1B3A6B' }}>
-          <Link
-            href="/admin"
-            className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl no-underline transition-all"
-            style={{ color: '#3D5A80', fontSize: '14px', fontWeight: 500 }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,168,76,0.06)'; e.currentTarget.style.color = '#8BA4C0'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#3D5A80'; }}
-          >
-            <Settings size={18} strokeWidth={2} style={{ flexShrink: 0 }} />
+        <div className="px-4 py-4" style={{ borderTop: '1px solid rgba(201,168,76,0.08)' }}>
+          <Link href="/admin" className="flex items-center gap-3 px-3 py-2.5 rounded-lg no-underline transition-all"
+            style={{ color: '#2E4A6A', fontSize: '13px' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,168,76,0.06)'; e.currentTarget.style.color = '#7A9CC0'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#2E4A6A'; }}>
+            <Settings size={15} />
             <span>Admin Panel</span>
           </Link>
-          <p className="text-[11px] px-4 mt-3" style={{ color: '#1B3A6B' }}>v1.0 · College Tournament</p>
+          <p className="text-[10px] px-3 mt-2" style={{ color: '#1E3A5A' }}>v1.0 · College Tournament</p>
         </div>
       </aside>
 
-      {/* Mobile bottom nav */}
-      <nav
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center py-2 px-1"
-        style={{ background: '#0F1E38', borderTop: '1px solid #1B3A6B' }}
-      >
+      {/* Mobile */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center py-2 px-1"
+        style={{ background: '#0A1525', borderTop: '1px solid rgba(201,168,76,0.12)' }}>
         {navItems.slice(0, 4).map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
           return (
-            <Link
-              key={href}
-              href={href}
-              className="flex flex-col items-center gap-1 px-2 py-2 rounded-lg no-underline transition-colors"
-              style={{ color: active ? '#E8C96A' : '#3D5A80', fontSize: '9px', fontWeight: active ? 600 : 500 }}
-            >
+            <Link key={href} href={href} className="flex flex-col items-center gap-1 px-2 py-2 rounded-lg no-underline"
+              style={{ color: active ? '#E8C96A' : '#2E4A6A', fontSize: '9px', fontWeight: active ? 600 : 400 }}>
               <Icon size={19} strokeWidth={active ? 2.5 : 1.8} />
               <span>{label}</span>
             </Link>
           );
         })}
-        <Link
-          href="/admin"
-          className="flex flex-col items-center gap-1 px-2 py-2 rounded-lg no-underline transition-colors"
-          style={{ color: pathname.startsWith('/admin') ? '#818CF8' : '#3A3A52', fontSize: '9px', fontWeight: pathname.startsWith('/admin') ? 600 : 500 }}
-        >
-          <Settings size={19} strokeWidth={pathname.startsWith('/admin') ? 2.5 : 1.8} />
+        <Link href="/admin" className="flex flex-col items-center gap-1 px-2 py-2 rounded-lg no-underline"
+          style={{ color: pathname.startsWith('/admin') ? '#E8C96A' : '#2E4A6A', fontSize: '9px' }}>
+          <Settings size={19} strokeWidth={1.8} />
           <span>Admin</span>
         </Link>
       </nav>
