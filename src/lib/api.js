@@ -35,8 +35,23 @@ export const getMatches = (params = {}) => {
 export const generateMatches = (matchType) =>
   apiFetch('/matches/generate', { method: 'POST', body: JSON.stringify({ matchType }) });
 
-export const updateMatchResult = (id, data) =>
-  apiFetch(`/matches/${id}/result`, { method: 'PUT', body: JSON.stringify(data) });
+export const updateMatchResult = (id, data) => {
+  // If type is 'board', use the ICF board endpoint
+  if (data.type === 'board') {
+    const { type, ...boardData } = data;
+    return apiFetch(`/matches/${id}/board`, { method: 'PUT', body: JSON.stringify(boardData) });
+  }
+  // If setting live with toss
+  if (data.status === 'live' && data.firstStrike) {
+    return apiFetch(`/matches/${id}/live`, { method: 'PUT', body: JSON.stringify({ firstStrike: data.firstStrike }) });
+  }
+  return apiFetch(`/matches/${id}/result`, { method: 'PUT', body: JSON.stringify(data) });
+};
+
+export const submitBoardResult = (id, boardData) =>
+  apiFetch(`/matches/${id}/board`, { method: 'PUT', body: JSON.stringify(boardData) });
+
+export const getMatchRules = () => apiFetch('/matches/rules');
 
 export const advanceMatches = (matchType, round) =>
   apiFetch('/matches/advance', { method: 'POST', body: JSON.stringify({ matchType, round }) });
