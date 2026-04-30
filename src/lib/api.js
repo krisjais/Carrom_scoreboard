@@ -133,7 +133,8 @@ export const clearMatches = async (matchType) => {
 };
 
 // ── Leaderboard ──────────────────────────────────────
-export const getLeaderboard = () => apiGet('/leaderboard');
+export const getLeaderboard = (type = 'single') => apiGet(`/leaderboard?type=${type}`);
+export const getAllLeaderboards = () => apiGet('/leaderboard?type=all');
 
 // ── Admin ────────────────────────────────────────────
 export const adminLogin = (password) =>
