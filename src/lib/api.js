@@ -140,3 +140,25 @@ export const adminLogin = (password) =>
   apiFetch('/admin/login', { method: 'POST', body: JSON.stringify({ password }) });
 
 export const getMatchRules = () => apiGet('/matches/rules');
+
+// Teams (manual pairing for doubles/mixed)
+export const getTeams = (matchType) =>
+  apiGet(`/teams${matchType ? `?matchType=${matchType}` : ''}`);
+
+export const createTeam = async (playerIds, matchType) => {
+  const result = await apiFetch('/teams', { method: 'POST', body: JSON.stringify({ playerIds, matchType }) });
+  invalidateCache('/teams');
+  return result;
+};
+
+export const deleteTeam = async (id) => {
+  const result = await apiFetch(`/teams/${id}`, { method: 'DELETE' });
+  invalidateCache('/teams');
+  return result;
+};
+
+export const generateMatchesFromTeams = async (matchType) => {
+  const result = await apiFetch('/teams/generate-matches', { method: 'POST', body: JSON.stringify({ matchType }) });
+  invalidateCache('/matches');
+  return result;
+};
