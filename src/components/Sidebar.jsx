@@ -75,21 +75,23 @@ export default function Sidebar() {
       </aside>
 
       {/* Mobile */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center py-2 px-1"
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center py-1.5 px-1"
         style={{ background: '#0A1525', borderTop: '1px solid rgba(201,168,76,0.12)' }}>
-        {navItems.slice(0, 4).map(({ href, label, icon: Icon }) => {
+        {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
           return (
-            <Link key={href} href={href} className="flex flex-col items-center gap-1 px-2 py-2 rounded-lg no-underline"
-              style={{ color: active ? '#E8C96A' : '#6B8FAD', fontSize: '9px', fontWeight: active ? 600 : 400 }}>
-              <Icon size={19} strokeWidth={active ? 2.5 : 1.8} />
-              <span>{label}</span>
+            <Link key={href} href={href}
+              className="flex flex-col items-center gap-0.5 px-1.5 py-1.5 rounded-lg no-underline transition-colors"
+              style={{ color: active ? '#E8C96A' : '#4A6A8A', fontSize: '8.5px', fontWeight: active ? 600 : 400, minWidth: '52px' }}>
+              <Icon size={18} strokeWidth={active ? 2.5 : 1.8} />
+              <span className="text-center leading-tight">{label}</span>
             </Link>
           );
         })}
-        <Link href="/admin" className="flex flex-col items-center gap-1 px-2 py-2 rounded-lg no-underline"
-          style={{ color: pathname.startsWith('/admin') ? '#E8C96A' : '#6B8FAD', fontSize: '9px' }}>
-          <Settings size={19} strokeWidth={1.8} />
+        <Link href="/admin"
+          className="flex flex-col items-center gap-0.5 px-1.5 py-1.5 rounded-lg no-underline transition-colors"
+          style={{ color: pathname.startsWith('/admin') ? '#E8C96A' : '#4A6A8A', fontSize: '8.5px', minWidth: '52px' }}>
+          <Settings size={18} strokeWidth={1.8} />
           <span>Admin</span>
         </Link>
       </nav>
