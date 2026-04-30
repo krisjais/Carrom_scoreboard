@@ -12,6 +12,12 @@ const TABS = [
   { key: 'mixed',  label: 'Mixed',     color: '#A78BFA', desc: 'Mixed doubles' },
 ];
 
+const CAT_LABELS = {
+  single: { full: 'Singles', color: '#60A5FA' },
+  double: { full: 'Doubles', color: '#C9A84C' },
+  mixed:  { full: 'Mixed',   color: '#F472B6' },
+};
+
 function RankTable({ board, accentColor }) {
   if (!board || board.length === 0) {
     return (
@@ -26,16 +32,20 @@ function RankTable({ board, accentColor }) {
   return (
     <div className="rounded-xl overflow-hidden" style={{ background: '#16161E', border: '1px solid #1E1E2A' }}>
       {board.map((entry, i) => {
-        const wr      = parseFloat(entry.winRate);
-        const isTop   = i < 3;
-        const wrColor = wr >= 70 ? '#4ADE80' : wr >= 40 ? '#C9A84C' : wr > 0 ? '#F87171' : '#3A3A52';
+        const wr         = parseFloat(entry.winRate);
+        const isTop      = i < 3;
+        const wrColor    = wr >= 70 ? '#4ADE80' : wr >= 40 ? '#C9A84C' : wr > 0 ? '#F87171' : '#3A3A52';
+        const ineligible = entry.eligible === false;
 
         return (
           <div key={entry._id}
             className="flex items-center gap-3 px-4 py-3.5 transition-colors"
-            style={{ borderBottom: '1px solid #1E1E2A', background: isTop ? `${accentColor}06` : 'transparent' }}
+            style={{
+              borderBottom: '1px solid #1E1E2A',
+              background: ineligible ? 'rgba(239,68,68,0.03)' : isTop ? `${accentColor}06` : 'transparent',
+            }}
             onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.025)'}
-            onMouseLeave={e => e.currentTarget.style.background = isTop ? `${accentColor}06` : 'transparent'}>
+            onMouseLeave={e => e.currentTarget.style.background = ineligible ? 'rgba(239,68,68,0.03)' : isTop ? `${accentColor}06` : 'transparent'}>
 
             {/* Rank */}
             <div className="flex-shrink-0 w-8 text-center">
@@ -44,27 +54,63 @@ function RankTable({ board, accentColor }) {
                 : <span className="text-[12px] font-bold" style={{ color: '#3A3A52' }}>#{i + 1}</span>}
             </div>
 
-            {/* Avatar + Name — takes remaining space */}
+            {/* Avatar + Name */}
             <div className="flex items-center gap-2.5 flex-1 min-w-0">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center text-[13px] font-black flex-shrink-0"
                 style={{
-                  background: isTop ? `${accentColor}20` : 'rgba(255,255,255,0.05)',
-                  color: isTop ? accentColor : '#4A4A5E',
-                  border: isTop ? `1px solid ${accentColor}30` : '1px solid #1E1E2A',
+                  background: ineligible ? 'rgba(239,68,68,0.1)' : isTop ? `${accentColor}20` : 'rgba(255,255,255,0.05)',
+                  color: ineligible ? '#F87171' : isTop ? accentColor : '#4A4A5E',
+                  border: ineligible ? '1px solid rgba(239,68,68,0.2)' : isTop ? `1px solid ${accentColor}30` : '1px solid #1E1E2A',
+                  opacity: ineligible ? 0.75 : 1,
                 }}>
                 {entry.name.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">
-                <p className="text-[13px] font-semibold truncate" style={{ color: '#F4F4F6' }}>{entry.name}</p>
-                <p className="text-[10px] truncate" style={{ color: '#3A3A52' }}>
-                  {entry.players
-                    ? entry.players.map(p => p.name).join(' & ')
-                    : entry.gender === 'male' ? '♂ Male' : '♀ Female'}
-                </p>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <p className="text-[13px] font-semibold truncate" style={{ color: ineligible ? '#6B6B85' : '#F4F4F6' }}>
+                    {entry.name}
+                  </p>
+                  {ineligible && (
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
+                      style={{ background: 'rgba(239,68,68,0.12)', color: '#F87171', border: '1px solid rgba(239,68,68,0.2)' }}>
+                      INELIGIBLE
+                    </span>
+                  )}
+                </div>
+
+                {/* Category badges + match count */}
+                <div className="flex items-center gap-1 mt-1 flex-wrap">
+                  {entry.categories?.map(cat => {
+                    const cfg = CAT_LABELS[cat];
+                    if (!cfg) return null;
+                    return (
+                      <span key={cat} className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+                        style={{ background: `${cfg.color}14`, color: cfg.color, border: `1px solid ${cfg.color}25` }}>
+                        {cfg.full}
+                      </span>
+                    );
+                  })}
+                  {entry.totalMatchCount !== undefined && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded"
+                      style={{ background: 'rgba(255,255,255,0.04)', color: ineligible ? '#F87171' : '#3A3A52', border: '1px solid #1E1E2A' }}>
+                      {entry.totalMatchCount}/3
+                    </span>
+                  )}
+                  {!entry.categories && entry.players && (
+                    <p className="text-[10px] truncate" style={{ color: '#3A3A52' }}>
+                      {entry.players.map(p => p.name).join(' & ')}
+                    </p>
+                  )}
+                  {!entry.categories && !entry.players && (
+                    <p className="text-[10px]" style={{ color: '#3A3A52' }}>
+                      {entry.gender === 'male' ? '♂ Male' : '♀ Female'}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Stats — compact on mobile */}
+            {/* Stats */}
             <div className="flex items-center gap-3 flex-shrink-0">
               <div className="text-center hidden sm:block" style={{ minWidth: '36px' }}>
                 <p className="text-[10px] uppercase tracking-wider" style={{ color: '#3A3A52' }}>P</p>
