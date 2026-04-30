@@ -372,7 +372,7 @@ function AdminActions({ match, onUpdateResult, nameA, nameB }) {
                 <span>{nameB.split(' ')[0]}: {Math.max(0, Number(coinsLeftA) * 10 + (queen === 'B' ? 50 : 0) - Number(foulsB) * 10)} pts</span>
               </div>
               <p className="text-[10px] mt-1" style={{ color: '#3A3A52' }}>
-                + 20 pts/min remaining will be added to the board winner
+                + 20 pts/min remaining will be added to the board winner (proportional for partial minutes)
               </p>
             </div>
           </div>

@@ -99,7 +99,9 @@ export default function RulesPage() {
       points: [
         'Each opponent coin remaining on board = 10 points',
         'Queen covered = 50 bonus points',
-        'Each remaining full minute when board ends = 20 points (winner only)',
+        'Each remaining minute when board ends = 20 points (winner only)',
+        'Partial minutes count proportionally — e.g. 30 seconds = 10 points, 45 seconds = 15 points',
+        'Formula: (remaining seconds ÷ 60) × 20, rounded to nearest point',
         'Each foul committed = −10 points penalty',
         'Board winner = player/team with higher board score',
       ],
