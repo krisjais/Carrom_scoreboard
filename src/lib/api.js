@@ -163,3 +163,14 @@ export const generateMatchesFromTeams = async (matchType) => {
   invalidateCache('/matches');
   return result;
 };
+
+// Team reshuffle — swap players between two teams
+export const reshuffleTeams = async (teamAId, teamBId, playerFromA, playerFromB) => {
+  const result = await apiFetch('/teams/reshuffle', {
+    method: 'POST',
+    body: JSON.stringify({ teamAId, teamBId, playerFromA, playerFromB }),
+  });
+  invalidateCache('/teams');
+  invalidateCache('/matches');
+  return result;
+};

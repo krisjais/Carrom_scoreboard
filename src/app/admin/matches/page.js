@@ -2,22 +2,29 @@
 import { useEffect, useState } from 'react';
 import {
   getMatches, getPlayers, updateMatchResult, clearMatches, advanceMatches,
-  getTeams, createTeam, deleteTeam, generateMatchesFromTeams, generateMatches
+  getTeams, createTeam, deleteTeam, generateMatchesFromTeams, generateMatches,
+  reshuffleTeams
 } from '@/lib/api';
 import MatchCard from '@/components/MatchCard';
 import Modal from '@/components/Modal';
-import { Trophy, Trash2, Swords, Users, UserPlus, X, Play } from 'lucide-react';
+import { Trophy, Trash2, Swords, Users, UserPlus, X, Play, ArrowLeftRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function MatchesPage() {
-  const [matches, setMatches]   = useState([]);
-  const [players, setPlayers]   = useState([]);
-  const [teams, setTeams]       = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [filter, setFilter]     = useState('single');
-  const [playerA, setPlayerA]   = useState('');
-  const [playerB, setPlayerB]   = useState('');
-  const [modal, setModal]       = useState({ isOpen: false, type: 'confirm', title: '', message: '', onConfirm: null });
+  const [matches, setMatches]         = useState([]);
+  const [players, setPlayers]         = useState([]);
+  const [teams, setTeams]             = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [filter, setFilter]           = useState('single');
+  const [playerA, setPlayerA]         = useState('');
+  const [playerB, setPlayerB]         = useState('');
+  const [modal, setModal]             = useState({ isOpen: false, type: 'confirm', title: '', message: '', onConfirm: null });
+  // Reshuffle state
+  const [reshuffleOpen, setReshuffleOpen] = useState(false);
+  const [rTeamA, setRTeamA]           = useState('');
+  const [rTeamB, setRTeamB]           = useState('');
+  const [rPlayerA, setRPlayerA]       = useState('');
+  const [rPlayerB, setRPlayerB]       = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -287,10 +294,134 @@ export default function MatchesPage() {
             <button onClick={advance} className="btn-secondary flex items-center gap-2 py-2.5 px-5">
               <Trophy size={14} /> Advance Winners
             </button>
+            <button onClick={() => setReshuffleOpen(!reshuffleOpen)}
+              className="flex items-center gap-2 py-2.5 px-5 rounded-lg font-semibold text-[13px] transition-all"
+              style={{
+                background: reshuffleOpen ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.03)',
+                border: reshuffleOpen ? '1px solid rgba(245,158,11,0.3)' : '1px solid #1E1E2A',
+                color: reshuffleOpen ? '#F59E0B' : '#4A4A5E',
+              }}>
+              <ArrowLeftRight size={14} /> Reshuffle Teams
+            </button>
             <button onClick={clearAll} className="btn-danger flex items-center gap-2 py-2.5 px-5">
               <Trash2 size={14} /> Clear Matches
             </button>
           </div>
+
+          {/* ── Reshuffle panel ── */}
+          {reshuffleOpen && teams.length >= 2 && (
+            <div className="glass-card overflow-hidden">
+              <div className="px-5 py-4 flex items-center gap-3"
+                style={{ borderBottom: '1px solid #1E1E2A', background: '#111118' }}>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                  <ArrowLeftRight size={14} style={{ color: '#F59E0B' }} />
+                </div>
+                <div>
+                  <p className="text-[13px] font-semibold" style={{ color: '#F4F4F6' }}>Reshuffle / Swap Players</p>
+                  <p className="text-[11px]" style={{ color: '#4A4A5E' }}>
+                    Swap one player from Team A with one player from Team B
+                  </p>
+                </div>
+              </div>
+              <div className="p-5 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Team A */}
+                  <div>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#4A4A5E' }}>
+                      Team A
+                    </label>
+                    <select value={rTeamA} onChange={e => { setRTeamA(e.target.value); setRPlayerA(''); }} className="input-field">
+                      <option value="">Select team...</option>
+                      {teams.map(t => (
+                        <option key={t._id} value={t._id}>
+                          {t.players?.map(p => p.name).join(' & ')}
+                        </option>
+                      ))}
+                    </select>
+                    {rTeamA && (
+                      <div className="mt-2">
+                        <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#4A4A5E' }}>
+                          Player to move out of Team A
+                        </label>
+                        <select value={rPlayerA} onChange={e => setRPlayerA(e.target.value)} className="input-field">
+                          <option value="">Select player...</option>
+                          {teams.find(t => t._id === rTeamA)?.players?.map(p => (
+                            <option key={p._id} value={p._id}>{p.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Team B */}
+                  <div>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#4A4A5E' }}>
+                      Team B
+                    </label>
+                    <select value={rTeamB} onChange={e => { setRTeamB(e.target.value); setRPlayerB(''); }} className="input-field">
+                      <option value="">Select team...</option>
+                      {teams.filter(t => t._id !== rTeamA).map(t => (
+                        <option key={t._id} value={t._id}>
+                          {t.players?.map(p => p.name).join(' & ')}
+                        </option>
+                      ))}
+                    </select>
+                    {rTeamB && (
+                      <div className="mt-2">
+                        <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#4A4A5E' }}>
+                          Player to move out of Team B
+                        </label>
+                        <select value={rPlayerB} onChange={e => setRPlayerB(e.target.value)} className="input-field">
+                          <option value="">Select player...</option>
+                          {teams.find(t => t._id === rTeamB)?.players?.map(p => (
+                            <option key={p._id} value={p._id}>{p.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Preview */}
+                {rTeamA && rTeamB && rPlayerA && rPlayerB && (() => {
+                  const tA = teams.find(t => t._id === rTeamA);
+                  const tB = teams.find(t => t._id === rTeamB);
+                  const pA = tA?.players?.find(p => p._id === rPlayerA);
+                  const pB = tB?.players?.find(p => p._id === rPlayerB);
+                  const newA = tA?.players?.filter(p => p._id !== rPlayerA).map(p => p.name).concat(pB?.name).join(' & ');
+                  const newB = tB?.players?.filter(p => p._id !== rPlayerB).map(p => p.name).concat(pA?.name).join(' & ');
+                  return (
+                    <div className="rounded-lg p-3 text-[12px]"
+                      style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)' }}>
+                      <p className="font-semibold mb-2" style={{ color: '#F59E0B' }}>After swap:</p>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span style={{ color: '#F4F4F6' }}>Team A → <strong>{newA}</strong></span>
+                        <ArrowLeftRight size={12} style={{ color: '#F59E0B' }} />
+                        <span style={{ color: '#F4F4F6' }}>Team B → <strong>{newB}</strong></span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                <button
+                  disabled={!rTeamA || !rTeamB || !rPlayerA || !rPlayerB}
+                  onClick={async () => {
+                    try {
+                      const r = await reshuffleTeams(rTeamA, rTeamB, rPlayerA, rPlayerB);
+                      showAlert('Done', r.message, 'success');
+                      setRTeamA(''); setRTeamB(''); setRPlayerA(''); setRPlayerB('');
+                      setReshuffleOpen(false);
+                      loadAll();
+                    } catch (e) { showAlert('Error', e.message, 'error'); }
+                  }}
+                  className="btn-primary flex items-center gap-2 py-2.5 px-6"
+                  style={{ background: 'linear-gradient(135deg, #d97706, #F59E0B)' }}>
+                  <ArrowLeftRight size={14} /> Confirm Swap
+                </button>
+              </div>
+            </div>
+          )}
         </>
       )}
 
