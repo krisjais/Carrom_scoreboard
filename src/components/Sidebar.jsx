@@ -3,19 +3,27 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { LayoutDashboard, User, Users, HeartHandshake, Trophy, Settings, ChevronRight } from 'lucide-react';
+import { prefetch, prefetchAll } from '@/lib/api';
+import { useEffect } from 'react';
 
 const navItems = [
-  { href: '/carrom',             label: 'Dashboard',   icon: LayoutDashboard },
-  { href: '/carrom/single',      label: 'Singles',     icon: User },
-  { href: '/carrom/double',      label: 'Doubles',     icon: Users },
-  { href: '/carrom/mixed',       label: 'Mixed',       icon: HeartHandshake },
-  { href: '/carrom/leaderboard', label: 'Leaderboard', icon: Trophy },
+  { href: '/carrom',             label: 'Dashboard',   icon: LayoutDashboard, prefetchKey: null },
+  { href: '/carrom/single',      label: 'Singles',     icon: User,            prefetchKey: 'single' },
+  { href: '/carrom/double',      label: 'Doubles',     icon: Users,           prefetchKey: 'double' },
+  { href: '/carrom/mixed',       label: 'Mixed',       icon: HeartHandshake,  prefetchKey: 'mixed' },
+  { href: '/carrom/leaderboard', label: 'Leaderboard', icon: Trophy,          prefetchKey: 'leaderboard' },
 ];
 
 const W = 300;
 
 export default function Sidebar() {
   const pathname = usePathname();
+
+  // Prefetch all data in background after mount
+  useEffect(() => {
+    const t = setTimeout(() => prefetchAll(), 500);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <>
@@ -36,10 +44,11 @@ export default function Sidebar() {
         {/* Nav */}
         <nav className="flex-1 px-4 py-5 space-y-1 overflow-y-auto">
           <p className="text-[10px] font-bold uppercase tracking-widest px-3 mb-4" style={{ color: '#1E3A5A' }}>Menu</p>
-          {navItems.map(({ href, label, icon: Icon }) => {
+          {navItems.map(({ href, label, icon: Icon, prefetchKey }) => {
             const active = pathname === href;
             return (
-              <Link key={href} href={href} className={`nav-link ${active ? 'active' : ''}`}>
+              <Link key={href} href={href} className={`nav-link ${active ? 'active' : ''}`}
+                onMouseEnter={() => { if (prefetchKey) prefetch(prefetchKey); }}>
                 {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 rounded-r" style={{ width: '3px', height: '55%', background: 'linear-gradient(180deg, #C9A84C, #E8C96A)' }} />}
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ background: active ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.04)', border: active ? '1px solid rgba(201,168,76,0.3)' : '1px solid rgba(255,255,255,0.06)' }}>
