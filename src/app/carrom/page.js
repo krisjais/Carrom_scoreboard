@@ -46,7 +46,10 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[1,2,3].map(i => <div key={i} className="skeleton h-24 rounded-xl" />)}
           </div>
-          <div className="skeleton h-40 rounded-xl" />
+          <div className="skeleton h-10 rounded-xl w-48" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1,2,3].map(i => <div key={i} className="skeleton h-40 rounded-xl" />)}
+          </div>
         </div>
       ) : (
         <>
