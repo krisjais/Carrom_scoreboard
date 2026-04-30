@@ -25,23 +25,6 @@ function RankTable({ board, accentColor }) {
 
   return (
     <div className="rounded-xl overflow-hidden" style={{ background: '#16161E', border: '1px solid #1E1E2A' }}>
-      {/* Head */}
-      <div className="grid px-5 py-3 text-[10px] font-bold uppercase tracking-wider"
-        style={{
-          gridTemplateColumns: '44px 1fr 70px 55px 55px 70px 70px',
-          background: 'rgba(6,11,24,0.5)',
-          borderBottom: '1px solid #1E1E2A',
-          color: '#3A3A52',
-        }}>
-        <div className="text-center">Rank</div>
-        <div>Player / Team</div>
-        <div className="text-center">Played</div>
-        <div className="text-center" style={{ color: '#4ADE80' }}>Wins</div>
-        <div className="text-center" style={{ color: '#F87171' }}>Loss</div>
-        <div className="text-center" style={{ color: '#C9A84C' }}>Points</div>
-        <div className="text-right">Win %</div>
-      </div>
-
       {board.map((entry, i) => {
         const wr      = parseFloat(entry.winRate);
         const isTop   = i < 3;
@@ -49,24 +32,20 @@ function RankTable({ board, accentColor }) {
 
         return (
           <div key={entry._id}
-            className="grid px-5 py-4 items-center transition-colors"
-            style={{
-              gridTemplateColumns: '44px 1fr 70px 55px 55px 70px 70px',
-              borderBottom: '1px solid #1E1E2A',
-              background: isTop ? `${accentColor}06` : 'transparent',
-            }}
+            className="flex items-center gap-3 px-4 py-3.5 transition-colors"
+            style={{ borderBottom: '1px solid #1E1E2A', background: isTop ? `${accentColor}06` : 'transparent' }}
             onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.025)'}
             onMouseLeave={e => e.currentTarget.style.background = isTop ? `${accentColor}06` : 'transparent'}>
 
             {/* Rank */}
-            <div className="text-center">
+            <div className="flex-shrink-0 w-8 text-center">
               {isTop
                 ? <span className="text-[18px] leading-none">{MEDALS[i]}</span>
                 : <span className="text-[12px] font-bold" style={{ color: '#3A3A52' }}>#{i + 1}</span>}
             </div>
 
-            {/* Name */}
-            <div className="flex items-center gap-3 min-w-0">
+            {/* Avatar + Name — takes remaining space */}
+            <div className="flex items-center gap-2.5 flex-1 min-w-0">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center text-[13px] font-black flex-shrink-0"
                 style={{
                   background: isTop ? `${accentColor}20` : 'rgba(255,255,255,0.05)',
@@ -77,23 +56,36 @@ function RankTable({ board, accentColor }) {
               </div>
               <div className="min-w-0">
                 <p className="text-[13px] font-semibold truncate" style={{ color: '#F4F4F6' }}>{entry.name}</p>
-                {entry.players
-                  ? <p className="text-[10px] truncate" style={{ color: '#3A3A52' }}>
-                      {entry.players.map(p => `${p.name}`).join(' & ')}
-                    </p>
-                  : <p className="text-[10px]" style={{ color: '#3A3A52' }}>
-                      {entry.gender === 'male' ? '♂ Male' : '♀ Female'}
-                    </p>
-                }
+                <p className="text-[10px] truncate" style={{ color: '#3A3A52' }}>
+                  {entry.players
+                    ? entry.players.map(p => p.name).join(' & ')
+                    : entry.gender === 'male' ? '♂ Male' : '♀ Female'}
+                </p>
               </div>
             </div>
 
-            <div className="text-center text-[13px] tabular-nums" style={{ color: '#6B8FAD' }}>{entry.matchesPlayed}</div>
-            <div className="text-center text-[14px] font-bold tabular-nums" style={{ color: '#4ADE80' }}>{entry.wins}</div>
-            <div className="text-center text-[13px] tabular-nums" style={{ color: '#F87171' }}>{entry.losses}</div>
-            <div className="text-center text-[13px] font-bold tabular-nums" style={{ color: '#C9A84C' }}>{entry.totalPoints}</div>
-            <div className="text-right">
-              <span className="text-[13px] font-black tabular-nums" style={{ color: wrColor }}>{entry.winRate}%</span>
+            {/* Stats — compact on mobile */}
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="text-center hidden sm:block" style={{ minWidth: '36px' }}>
+                <p className="text-[10px] uppercase tracking-wider" style={{ color: '#3A3A52' }}>P</p>
+                <p className="text-[13px] tabular-nums" style={{ color: '#6B8FAD' }}>{entry.matchesPlayed}</p>
+              </div>
+              <div className="text-center" style={{ minWidth: '32px' }}>
+                <p className="text-[10px] uppercase tracking-wider" style={{ color: '#3A3A52' }}>W</p>
+                <p className="text-[13px] font-bold tabular-nums" style={{ color: '#4ADE80' }}>{entry.wins}</p>
+              </div>
+              <div className="text-center" style={{ minWidth: '32px' }}>
+                <p className="text-[10px] uppercase tracking-wider" style={{ color: '#3A3A52' }}>L</p>
+                <p className="text-[13px] tabular-nums" style={{ color: '#F87171' }}>{entry.losses}</p>
+              </div>
+              <div className="text-center hidden sm:block" style={{ minWidth: '40px' }}>
+                <p className="text-[10px] uppercase tracking-wider" style={{ color: '#3A3A52' }}>Pts</p>
+                <p className="text-[13px] font-bold tabular-nums" style={{ color: '#C9A84C' }}>{entry.totalPoints}</p>
+              </div>
+              <div className="text-right" style={{ minWidth: '48px' }}>
+                <p className="text-[10px] uppercase tracking-wider" style={{ color: '#3A3A52' }}>Win%</p>
+                <p className="text-[13px] font-black tabular-nums" style={{ color: wrColor }}>{entry.winRate}%</p>
+              </div>
             </div>
           </div>
         );
