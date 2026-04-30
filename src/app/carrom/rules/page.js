@@ -97,9 +97,10 @@ export default function RulesPage() {
       icon: '📊',
       color: '#C9A84C',
       points: [
-        'Each opponent coin remaining on board = 1 point',
-        'Queen covered = 3 bonus points',
-        'Each foul committed = −1 point penalty',
+        'Each opponent coin remaining on board = 10 points',
+        'Queen covered = 50 bonus points',
+        'Each remaining full minute when board ends = 20 points (winner only)',
+        'Each foul committed = −10 points penalty',
         'Board winner = player/team with higher board score',
       ],
     },
@@ -155,7 +156,7 @@ export default function RulesPage() {
           {[
             { label: 'Win by Points', value: '25 pts', color: '#4ADE80' },
             { label: 'Win by Boards', value: '8 boards', color: '#60A5FA' },
-            { label: 'Queen Value', value: '3 pts', color: '#EF4444' },
+            { label: 'Queen Value',   value: '50 pts',  color: '#EF4444' },
           ].map(s => (
             <div key={s.label} className="text-center py-3 rounded-lg"
               style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
