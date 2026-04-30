@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { LayoutDashboard, User, Users, HeartHandshake, Trophy, Settings, ChevronRight, BookOpen } from 'lucide-react';
+import { LayoutDashboard, User, Users, HeartHandshake, Trophy, Settings, ChevronRight, BookOpen, BarChart2 } from 'lucide-react';
 import { prefetch, prefetchAll } from '@/lib/api';
 import { useEffect } from 'react';
 
@@ -12,6 +12,7 @@ const navItems = [
   { href: '/carrom/double',      label: 'Doubles',     icon: Users,           prefetchKey: 'double' },
   { href: '/carrom/mixed',       label: 'Mixed',       icon: HeartHandshake,  prefetchKey: 'mixed' },
   { href: '/carrom/leaderboard', label: 'Leaderboard', icon: Trophy,          prefetchKey: 'leaderboard' },
+  { href: '/carrom/players',     label: 'Players',     icon: BarChart2,       prefetchKey: null },
   { href: '/carrom/rules',       label: 'Rules',       icon: BookOpen,        prefetchKey: null },
 ];
 
