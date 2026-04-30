@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
-import { User, Users, HeartHandshake, Trophy, Play, Crown, Target, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { User, Users, HeartHandshake, Trophy, Play, Crown, Target, X } from 'lucide-react';
+import MatchTimer from './MatchTimer';
 
 /* ── Inline Modal ─────────────────────────────────── */
 function InlineModal({ isOpen, onClose, title, children }) {
@@ -117,17 +118,24 @@ export default function MatchCard({ match, onUpdateResult, showActions = false }
         </div>
       </div>
 
-      {/* Progress bar */}
+      {/* Timer + Progress bar */}
       {match.status === 'live' && (
-        <div className="mt-3">
-          <div className="flex justify-between text-[10px] mb-1" style={{ color: '#6B8FAD' }}>
-            <span>{match.scoreA}/25 pts · {match.boardsWonA}/8 boards</span>
-            <span>{match.scoreB}/25 pts · {match.boardsWonB}/8 boards</span>
-          </div>
-          <div className="flex gap-0.5 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
-            <div style={{ width: `${Math.min((match.scoreA / 25) * 50, 50)}%`, background: 'linear-gradient(90deg, #C9A84C, #FFD97D)', transition: 'width 0.3s' }} />
-            <div style={{ flex: 1 }} />
-            <div style={{ width: `${Math.min((match.scoreB / 25) * 50, 50)}%`, background: 'linear-gradient(270deg, #C9A84C, #FFD97D)', transition: 'width 0.3s' }} />
+        <div className="mt-3 space-y-2">
+          <MatchTimer
+            matchType={match.matchType}
+            startedAt={match.startedAt}
+            status={match.status}
+          />
+          <div>
+            <div className="flex justify-between text-[10px] mb-1" style={{ color: '#6B8FAD' }}>
+              <span>{match.scoreA}/25 pts · {match.boardsWonA}/8 boards</span>
+              <span>{match.scoreB}/25 pts · {match.boardsWonB}/8 boards</span>
+            </div>
+            <div className="flex gap-0.5 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+              <div style={{ width: `${Math.min((match.scoreA / 25) * 50, 50)}%`, background: 'linear-gradient(90deg, #C9A84C, #FFD97D)', transition: 'width 0.3s' }} />
+              <div style={{ flex: 1 }} />
+              <div style={{ width: `${Math.min((match.scoreB / 25) * 50, 50)}%`, background: 'linear-gradient(270deg, #C9A84C, #FFD97D)', transition: 'width 0.3s' }} />
+            </div>
           </div>
         </div>
       )}
