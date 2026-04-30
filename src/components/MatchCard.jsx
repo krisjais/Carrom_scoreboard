@@ -185,15 +185,22 @@ function AdminActions({ match, onUpdateResult, nameA, nameB }) {
 
   function handleBoardSubmit() {
     setBoardOpen(false);
+    // Calculate remaining seconds from the timer
+    const DURATIONS = { single: 10 * 60, double: 15 * 60, mixed: 15 * 60 };
+    const total     = DURATIONS[match.matchType] || 600;
+    const started   = match.startedAt ? new Date(match.startedAt).getTime() : Date.now();
+    const elapsed   = Math.floor((Date.now() - started) / 1000);
+    const remaining = Math.max(0, total - elapsed);
+
     onUpdateResult(match._id, {
       type: 'board',
-      coinsLeftA: Number(coinsLeftA),
-      coinsLeftB: Number(coinsLeftB),
-      queenCoveredBy: queen === 'none' ? null : queen,
-      foulsA: Number(foulsA),
-      foulsB: Number(foulsB),
+      coinsLeftA:      Number(coinsLeftA),
+      coinsLeftB:      Number(coinsLeftB),
+      queenCoveredBy:  queen === 'none' ? null : queen,
+      foulsA:          Number(foulsA),
+      foulsB:          Number(foulsB),
+      remainingSeconds: remaining,
     });
-    // Reset
     setCoinsLeftA(0); setCoinsLeftB(0); setQueen('none'); setFoulsA(0); setFoulsB(0);
   }
 
@@ -221,7 +228,10 @@ function AdminActions({ match, onUpdateResult, nameA, nameB }) {
           </button>
 
           <div className="rounded-lg p-3 text-[11px]" style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.15)' }}>
-            <p className="font-semibold mb-1" style={{ color: '#C9A84C' }}>ICF Win Conditions</p>
+            <p className="font-semibold mb-1.5" style={{ color: '#C9A84C' }}>Scoring Rules</p>
+            <div className="space-y-0.5 mb-2" style={{ color: '#6B8FAD' }}>
+              <p>🪙 Coin = <strong style={{ color: '#F4F4F6' }}>10 pts</strong> &nbsp;·&nbsp; 👑 Queen = <strong style={{ color: '#EF4444' }}>50 pts</strong> &nbsp;·&nbsp; ⏱ /min = <strong style={{ color: '#4ADE80' }}>20 pts</strong></p>
+            </div>
             <div className="flex justify-between" style={{ color: '#6B8FAD' }}>
               <span>{nameA.split(' ')[0]}: {match.scoreA}pts · {match.boardsWonA}B</span>
               <span>{nameB.split(' ')[0]}: {match.scoreB}pts · {match.boardsWonB}B</span>
@@ -333,10 +343,37 @@ function AdminActions({ match, onUpdateResult, nameA, nameB }) {
 
           {/* Preview score */}
           <div className="rounded-lg p-3 text-[11px]" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid #1E1E2A' }}>
-            <p className="font-semibold mb-1" style={{ color: '#4A4A5E' }}>Board score preview</p>
-            <div className="flex justify-between font-bold" style={{ color: '#F4F4F6' }}>
-              <span>{nameA.split(' ')[0]}: {Math.max(0, Number(coinsLeftB) + (queen === 'A' ? 3 : 0) - Number(foulsA))} pts</span>
-              <span>{nameB.split(' ')[0]}: {Math.max(0, Number(coinsLeftA) + (queen === 'B' ? 3 : 0) - Number(foulsB))} pts</span>
+            <p className="font-semibold mb-2" style={{ color: '#4A4A5E' }}>Score preview (before time bonus)</p>
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <span style={{ color: '#8B8B9E' }}>{nameA.split(' ')[0]} coins scored:</span>
+                <span style={{ color: '#F4F4F6' }}>{Number(coinsLeftB)} × 10 = <strong>{Number(coinsLeftB) * 10}</strong></span>
+              </div>
+              <div className="flex justify-between">
+                <span style={{ color: '#8B8B9E' }}>{nameB.split(' ')[0]} coins scored:</span>
+                <span style={{ color: '#F4F4F6' }}>{Number(coinsLeftA)} × 10 = <strong>{Number(coinsLeftA) * 10}</strong></span>
+              </div>
+              {queen !== 'none' && (
+                <div className="flex justify-between">
+                  <span style={{ color: '#8B8B9E' }}>Queen (50 pts) → {queen === 'A' ? nameA.split(' ')[0] : nameB.split(' ')[0]}:</span>
+                  <span style={{ color: '#EF4444' }}>+50</span>
+                </div>
+              )}
+              {(Number(foulsA) > 0 || Number(foulsB) > 0) && (
+                <div className="flex justify-between">
+                  <span style={{ color: '#8B8B9E' }}>Fouls (−10 each):</span>
+                  <span style={{ color: '#F87171' }}>
+                    {nameA.split(' ')[0]}: −{Number(foulsA) * 10} · {nameB.split(' ')[0]}: −{Number(foulsB) * 10}
+                  </span>
+                </div>
+              )}
+              <div className="pt-1 mt-1 flex justify-between font-bold" style={{ borderTop: '1px solid #1E1E2A', color: '#F4F4F6' }}>
+                <span>{nameA.split(' ')[0]}: {Math.max(0, Number(coinsLeftB) * 10 + (queen === 'A' ? 50 : 0) - Number(foulsA) * 10)} pts</span>
+                <span>{nameB.split(' ')[0]}: {Math.max(0, Number(coinsLeftA) * 10 + (queen === 'B' ? 50 : 0) - Number(foulsB) * 10)} pts</span>
+              </div>
+              <p className="text-[10px] mt-1" style={{ color: '#3A3A52' }}>
+                + 20 pts/min remaining will be added to the board winner
+              </p>
             </div>
           </div>
 
