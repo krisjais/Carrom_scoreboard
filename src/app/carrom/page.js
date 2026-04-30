@@ -24,7 +24,6 @@ export default function DashboardPage() {
     }
     load();
   }, []);
-
   return (
     <div className="animate-fade-in" style={{ width: '100%' }}>
 

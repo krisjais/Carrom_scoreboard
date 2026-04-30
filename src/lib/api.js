@@ -1,19 +1,25 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
-// ── In-memory cache ──────────────────────────────────
-// Stores { data, timestamp } per cache key
-const cache = new Map();
-const CACHE_TTL = 30 * 1000; // 30 seconds
+// ── Cache ─────────────────────────────────────────────
+// Stale-while-revalidate: serve stale data instantly, refresh in background
+const cache   = new Map(); // key → { data, ts }
+const FRESH   = 60 * 1000;   // 60s — serve from cache, no network
+const STALE   = 5 * 60 * 1000; // 5min — serve stale instantly + revalidate bg
 
-function getCached(key) {
-  const entry = cache.get(key);
-  if (!entry) return null;
-  if (Date.now() - entry.timestamp > CACHE_TTL) { cache.delete(key); return null; }
-  return entry.data;
+function isFresh(ts)  { return Date.now() - ts < FRESH; }
+function isStale(ts)  { return Date.now() - ts < STALE; }
+
+function getCache(key) {
+  const e = cache.get(key);
+  if (!e) return { data: null, stale: false };
+  if (isFresh(e.ts))  return { data: e.data, stale: false };
+  if (isStale(e.ts))  return { data: e.data, stale: true };
+  cache.delete(key);
+  return { data: null, stale: false };
 }
 
-function setCached(key, data) {
-  cache.set(key, { data, timestamp: Date.now() });
+function setCache(key, data) {
+  cache.set(key, { data, ts: Date.now() });
 }
 
 export function invalidateCache(pattern) {
@@ -22,155 +28,165 @@ export function invalidateCache(pattern) {
   }
 }
 
-// ── In-flight deduplication ──────────────────────────
-// If the same GET is already in-flight, reuse the same promise
+// ── In-flight dedup ───────────────────────────────────
 const inFlight = new Map();
 
-// ── Core fetch ───────────────────────────────────────
+// ── Core fetch ────────────────────────────────────────
 async function apiFetch(endpoint, options = {}) {
-  const url = `${API_BASE}${endpoint}`;
-  const res = await fetch(url, {
+  const res = await fetch(`${API_BASE}${endpoint}`, {
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   });
   if (!res.ok) {
-    const error = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(error.error || 'API request failed');
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'API request failed');
   }
   return res.json();
 }
 
-// GET with cache + deduplication
-async function apiGet(endpoint) {
-  const cached = getCached(endpoint);
-  if (cached) return cached;
+// ── GET with SWR ──────────────────────────────────────
+function apiGet(endpoint, { background = false } = {}) {
+  const { data, stale } = getCache(endpoint);
 
-  // Deduplicate in-flight requests
+  // Fresh — return immediately, no network
+  if (data && !stale) return Promise.resolve(data);
+
+  // Stale — return cached data instantly, revalidate in background
+  if (data && stale) {
+    if (!inFlight.has(endpoint)) {
+      const p = apiFetch(endpoint)
+        .then(fresh => { setCache(endpoint, fresh); inFlight.delete(endpoint); return fresh; })
+        .catch(() => { inFlight.delete(endpoint); });
+      inFlight.set(endpoint, p);
+    }
+    return Promise.resolve(data); // instant return
+  }
+
+  // No cache — must wait for network (deduplicated)
   if (inFlight.has(endpoint)) return inFlight.get(endpoint);
 
-  const promise = apiFetch(endpoint)
-    .then(data => { setCached(endpoint, data); inFlight.delete(endpoint); return data; })
+  const p = apiFetch(endpoint)
+    .then(data => { setCache(endpoint, data); inFlight.delete(endpoint); return data; })
     .catch(err  => { inFlight.delete(endpoint); throw err; });
 
-  inFlight.set(endpoint, promise);
-  return promise;
+  inFlight.set(endpoint, p);
+  return p;
 }
 
-// ── Prefetch ─────────────────────────────────────────
-// Call this to warm the cache before the user navigates
+// ── Prefetch ──────────────────────────────────────────
 export function prefetch(matchType) {
   const key = `/matches${matchType ? `?matchType=${matchType}` : ''}`;
-  if (!getCached(key)) apiGet(key).catch(() => {});
+  apiGet(key, { background: true });
 }
 
 export function prefetchAll() {
-  apiGet('/players').catch(() => {});
-  apiGet('/matches').catch(() => {});
-  apiGet('/leaderboard').catch(() => {});
-  ['single', 'double', 'mixed'].forEach(t => {
-    apiGet(`/matches?matchType=${t}`).catch(() => {});
-  });
+  [
+    '/players',
+    '/matches',
+    '/leaderboard?type=all',
+    '/matches?matchType=single',
+    '/matches?matchType=double',
+    '/matches?matchType=mixed',
+  ].forEach(k => apiGet(k, { background: true }));
 }
 
-// ── Players ──────────────────────────────────────────
+// ── Players ───────────────────────────────────────────
 export const getPlayers = (gender) =>
   apiGet(`/players${gender ? `?gender=${gender}` : ''}`);
 
 export const createPlayer = async (data) => {
-  const result = await apiFetch('/players', { method: 'POST', body: JSON.stringify(data) });
+  const r = await apiFetch('/players', { method: 'POST', body: JSON.stringify(data) });
   invalidateCache('/players');
-  return result;
+  return r;
 };
 
 export const updatePlayer = async (id, data) => {
-  const result = await apiFetch(`/players/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+  const r = await apiFetch(`/players/${id}`, { method: 'PUT', body: JSON.stringify(data) });
   invalidateCache('/players');
-  return result;
+  return r;
 };
 
 export const deletePlayer = async (id) => {
-  const result = await apiFetch(`/players/${id}`, { method: 'DELETE' });
+  const r = await apiFetch(`/players/${id}`, { method: 'DELETE' });
   invalidateCache('/players');
-  return result;
+  return r;
 };
 
-// ── Matches ──────────────────────────────────────────
+// ── Matches ───────────────────────────────────────────
 export const getMatches = (params = {}) => {
-  const query = new URLSearchParams(params).toString();
-  return apiGet(`/matches${query ? `?${query}` : ''}`);
+  const q = new URLSearchParams(params).toString();
+  return apiGet(`/matches${q ? `?${q}` : ''}`);
 };
 
 export const generateMatches = async (matchType) => {
-  const result = await apiFetch('/matches/generate', { method: 'POST', body: JSON.stringify({ matchType }) });
+  const r = await apiFetch('/matches/generate', { method: 'POST', body: JSON.stringify({ matchType }) });
   invalidateCache('/matches');
-  return result;
+  return r;
 };
 
 export const updateMatchResult = async (id, data) => {
-  let result;
+  let r;
   if (data.type === 'board') {
-    const { type, ...boardData } = data;
-    result = await apiFetch(`/matches/${id}/board`, { method: 'PUT', body: JSON.stringify(boardData) });
-  } else if (data.status === 'live' && data.firstStrike) {
-    result = await apiFetch(`/matches/${id}/live`, { method: 'PUT', body: JSON.stringify({ firstStrike: data.firstStrike }) });
+    const { type, ...body } = data;
+    r = await apiFetch(`/matches/${id}/board`, { method: 'PUT', body: JSON.stringify(body) });
+  } else if (data.status === 'live' && data.firstStrike !== undefined) {
+    r = await apiFetch(`/matches/${id}/live`, { method: 'PUT', body: JSON.stringify({ firstStrike: data.firstStrike }) });
   } else {
-    result = await apiFetch(`/matches/${id}/result`, { method: 'PUT', body: JSON.stringify(data) });
+    r = await apiFetch(`/matches/${id}/result`, { method: 'PUT', body: JSON.stringify(data) });
   }
   invalidateCache('/matches');
-  return result;
+  return r;
 };
 
 export const advanceMatches = async (matchType, round) => {
-  const result = await apiFetch('/matches/advance', { method: 'POST', body: JSON.stringify({ matchType, round }) });
+  const r = await apiFetch('/matches/advance', { method: 'POST', body: JSON.stringify({ matchType, round }) });
   invalidateCache('/matches');
-  return result;
+  return r;
 };
 
 export const clearMatches = async (matchType) => {
-  const result = await apiFetch(`/matches/clear${matchType ? `?matchType=${matchType}` : ''}`, { method: 'DELETE' });
+  const r = await apiFetch(`/matches/clear${matchType ? `?matchType=${matchType}` : ''}`, { method: 'DELETE' });
   invalidateCache('/matches');
-  return result;
+  return r;
 };
 
-// ── Leaderboard ──────────────────────────────────────
-export const getLeaderboard = (type = 'single') => apiGet(`/leaderboard?type=${type}`);
-export const getAllLeaderboards = () => apiGet('/leaderboard?type=all');
+// ── Leaderboard ───────────────────────────────────────
+export const getLeaderboard    = (type = 'single') => apiGet(`/leaderboard?type=${type}`);
+export const getAllLeaderboards = ()                => apiGet('/leaderboard?type=all');
 
-// ── Admin ────────────────────────────────────────────
-export const adminLogin = (password) =>
+// ── Admin ─────────────────────────────────────────────
+export const adminLogin   = (password) =>
   apiFetch('/admin/login', { method: 'POST', body: JSON.stringify({ password }) });
-
 export const getMatchRules = () => apiGet('/matches/rules');
 
-// Teams (manual pairing for doubles/mixed)
+// ── Teams ─────────────────────────────────────────────
 export const getTeams = (matchType) =>
   apiGet(`/teams${matchType ? `?matchType=${matchType}` : ''}`);
 
 export const createTeam = async (playerIds, matchType) => {
-  const result = await apiFetch('/teams', { method: 'POST', body: JSON.stringify({ playerIds, matchType }) });
+  const r = await apiFetch('/teams', { method: 'POST', body: JSON.stringify({ playerIds, matchType }) });
   invalidateCache('/teams');
-  return result;
+  return r;
 };
 
 export const deleteTeam = async (id) => {
-  const result = await apiFetch(`/teams/${id}`, { method: 'DELETE' });
+  const r = await apiFetch(`/teams/${id}`, { method: 'DELETE' });
   invalidateCache('/teams');
-  return result;
+  return r;
 };
 
 export const generateMatchesFromTeams = async (matchType) => {
-  const result = await apiFetch('/teams/generate-matches', { method: 'POST', body: JSON.stringify({ matchType }) });
+  const r = await apiFetch('/teams/generate-matches', { method: 'POST', body: JSON.stringify({ matchType }) });
   invalidateCache('/matches');
-  return result;
+  return r;
 };
 
-// Team reshuffle — swap players between two teams
 export const reshuffleTeams = async (teamAId, teamBId, playerFromA, playerFromB) => {
-  const result = await apiFetch('/teams/reshuffle', {
+  const r = await apiFetch('/teams/reshuffle', {
     method: 'POST',
     body: JSON.stringify({ teamAId, teamBId, playerFromA, playerFromB }),
   });
   invalidateCache('/teams');
   invalidateCache('/matches');
-  return result;
+  return r;
 };

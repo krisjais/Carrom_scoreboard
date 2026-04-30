@@ -5,22 +5,25 @@ import { prefetchAll } from '@/lib/api';
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 function ping() {
-  fetch(`${API}/health`, { method: 'GET' }).catch(() => {});
+  fetch(`${API}/health`, { method: 'GET', cache: 'no-store' }).catch(() => {});
 }
 
 export default function BackendWakeup() {
   useEffect(() => {
-    // Immediate ping on load
+    // 1. Ping immediately to wake Render
     ping();
 
-    // Prefetch all data 1s after load (backend should be awake by then)
-    const prefetchTimer = setTimeout(() => prefetchAll(), 1000);
+    // 2. Prefetch all data right away — don't wait
+    prefetchAll();
 
-    // Keep Render warm — ping every 10 minutes
-    const keepAlive = setInterval(ping, 10 * 60 * 1000);
+    // 3. Prefetch again after 2s (in case backend was cold)
+    const t1 = setTimeout(() => prefetchAll(), 2000);
+
+    // 4. Keep Render warm — ping every 8 minutes
+    const keepAlive = setInterval(ping, 8 * 60 * 1000);
 
     return () => {
-      clearTimeout(prefetchTimer);
+      clearTimeout(t1);
       clearInterval(keepAlive);
     };
   }, []);
