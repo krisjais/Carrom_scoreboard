@@ -6,7 +6,7 @@ import {
 } from '@/lib/api';
 import MatchCard from '@/components/MatchCard';
 import Modal from '@/components/Modal';
-import { Trophy, Trash2, Swords, Users, UserPlus, X, Play, AlertCircle } from 'lucide-react';
+import { Trophy, Trash2, Swords, Users, UserPlus, X, Play } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function MatchesPage() {
@@ -109,12 +109,8 @@ export default function MatchesPage() {
   // Players already in a team for this category
   const pairedIds = new Set(teams.flatMap(t => t.players?.map(p => p._id || p) || []));
 
-  // Filter available players — exclude already paired AND already played this category
-  const availablePlayers = players.filter(p => {
-    if (pairedIds.has(p._id)) return false;
-    if (p.categories?.includes(filter)) return false; // already played this category
-    return true;
-  });
+  // Filter available players for doubles/mixed
+  const availablePlayers = players.filter(p => !pairedIds.has(p._id));
   const availableA = filter === 'mixed'
     ? availablePlayers.filter(p => p.gender === 'male')
     : availablePlayers;
@@ -198,17 +194,6 @@ export default function MatchesPage() {
               </div>
             </div>
             <form onSubmit={handleAddTeam} className="p-5">
-              {/* Show how many players are blocked */}
-              {(() => {
-                const blocked = players.filter(p => p.categories?.includes(filter)).length;
-                return blocked > 0 ? (
-                  <div className="mb-4 px-3 py-2.5 rounded-lg flex items-center gap-2 text-[11px]"
-                    style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.15)', color: '#F87171' }}>
-                    <AlertCircle size={13} />
-                    {blocked} player{blocked > 1 ? 's' : ''} already played {filter === 'double' ? 'Doubles' : 'Mixed'} and are excluded.
-                  </div>
-                ) : null;
-              })()}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                 <div>
                   <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
