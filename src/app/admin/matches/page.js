@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react';
 import {
   getMatches, getPlayers, updateMatchResult, clearMatches, advanceMatches,
   getTeams, createTeam, deleteTeam, generateMatchesFromTeams, generateMatches,
-  reshuffleTeams
+  reshuffleTeams, resolveConflict
 } from '@/lib/api';
 import MatchCard from '@/components/MatchCard';
 import Modal from '@/components/Modal';
-import { Trophy, Trash2, Swords, Users, UserPlus, X, Play, ArrowLeftRight } from 'lucide-react';
+import { Trophy, Trash2, Swords, Users, UserPlus, X, Play, ArrowLeftRight, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function MatchesPage() {
@@ -25,6 +25,9 @@ export default function MatchesPage() {
   const [rTeamB, setRTeamB]           = useState('');
   const [rPlayerA, setRPlayerA]       = useState('');
   const [rPlayerB, setRPlayerB]       = useState('');
+  // Conflict resolution state
+  const [conflict, setConflict]       = useState(null); // holds conflict data from API
+  const [selectedReplacement, setSelectedReplacement] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -105,9 +108,35 @@ export default function MatchesPage() {
     const rounds = [...new Set(matches.map(m => m.round))];
     const latest = rounds.length ? Math.max(...rounds) : 1;
     showConfirm('Advance Winners', `Advance Round ${latest} winners to Round ${latest + 1}?`, async () => {
-      try { await advanceMatches(filter, latest); showAlert('Done', 'Winners advanced.', 'success'); loadAll(); }
-      catch (e) { showAlert('Error', e.message, 'error'); }
+      try {
+        const result = await advanceMatches(filter, latest);
+        // Check if conflict was detected
+        if (result.conflict) {
+          setConflict({ ...result, round: latest });
+          setSelectedReplacement('');
+        } else {
+          showAlert('Done', result.message, 'success');
+          loadAll();
+        }
+      } catch (e) { showAlert('Error', e.message, 'error'); }
     });
+  }
+
+  async function handleResolveConflict() {
+    if (!selectedReplacement) { showAlert('Select', 'Please select a replacement player', 'error'); return; }
+    try {
+      const result = await resolveConflict(
+        conflict.matchType,
+        conflict.round,
+        conflict.rank2Team.id,
+        conflict.commonPlayers[0]._id,
+        selectedReplacement
+      );
+      setConflict(null);
+      setSelectedReplacement('');
+      showAlert('Done', result.message, 'success');
+      loadAll();
+    } catch (e) { showAlert('Error', e.message, 'error'); }
   }
 
   const liveCount = matches.filter(m => m.status === 'live').length;
@@ -466,6 +495,112 @@ export default function MatchesPage() {
 
       <Modal isOpen={modal.isOpen} type={modal.type} title={modal.title} message={modal.message}
         onConfirm={modal.onConfirm} onClose={closeModal} />
+
+      {/* ── Common Player Conflict Resolution Modal ── */}
+      {conflict && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)' }}>
+          <div className="w-full max-w-lg rounded-2xl overflow-hidden animate-fade-in"
+            style={{ background: '#16161E', border: '1px solid rgba(245,158,11,0.3)', boxShadow: '0 24px 64px rgba(0,0,0,0.6)' }}>
+
+            {/* Header */}
+            <div className="px-6 py-5 flex items-center gap-3"
+              style={{ borderBottom: '1px solid #1E1E2A', background: 'rgba(245,158,11,0.06)' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)' }}>
+                <AlertTriangle size={18} style={{ color: '#F59E0B' }} />
+              </div>
+              <div>
+                <p className="text-[15px] font-bold" style={{ color: '#F4F4F6' }}>Common Player Conflict</p>
+                <p className="text-[11px]" style={{ color: '#F59E0B' }}>Requires resolution before advancing</p>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-5">
+              {/* Explanation */}
+              <div className="rounded-xl p-4 text-[12px] leading-relaxed"
+                style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', color: '#D4A017' }}>
+                <strong style={{ color: '#F59E0B' }}>
+                  {conflict.commonPlayers.map(p => p.name).join(', ')}
+                </strong> is in both the <strong>1st place</strong> and <strong>2nd place</strong> teams.
+                <br /><br />
+                This player will stay with the <strong>1st place team</strong>. The 2nd place team needs a replacement player from the <strong>3rd place team</strong>.
+              </div>
+
+              {/* Teams display */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl p-3" style={{ background: 'rgba(74,222,128,0.06)', border: '1px solid rgba(74,222,128,0.2)' }}>
+                  <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: '#4ADE80' }}>🥇 1st Place (keeps player)</p>
+                  {conflict.rank1Team.players.map(p => (
+                    <p key={p._id} className="text-[12px] font-semibold" style={{ color: '#F4F4F6' }}>
+                      {p.name}
+                      {conflict.commonPlayers.some(cp => cp._id === p._id) && (
+                        <span className="ml-1 text-[10px]" style={{ color: '#4ADE80' }}>✓ stays</span>
+                      )}
+                    </p>
+                  ))}
+                </div>
+                <div className="rounded-xl p-3" style={{ background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.2)' }}>
+                  <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: '#F87171' }}>🥈 2nd Place (needs replacement)</p>
+                  {conflict.rank2Team.players.map(p => (
+                    <p key={p._id} className="text-[12px] font-semibold" style={{ color: conflict.commonPlayers.some(cp => cp._id === p._id) ? '#F87171' : '#F4F4F6' }}>
+                      {p.name}
+                      {conflict.commonPlayers.some(cp => cp._id === p._id) && (
+                        <span className="ml-1 text-[10px]" style={{ color: '#F87171' }}>✗ removed</span>
+                      )}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              {/* Replacement picker */}
+              {conflict.rank3Team ? (
+                <div>
+                  <p className="text-[12px] font-semibold mb-2" style={{ color: '#F4F4F6' }}>
+                    Choose replacement from 🥉 3rd place team:
+                  </p>
+                  <div className="flex gap-2">
+                    {conflict.rank3Team.players.map(p => (
+                      <button key={p._id}
+                        onClick={() => setSelectedReplacement(p._id)}
+                        className="flex-1 py-3 rounded-xl text-[13px] font-bold transition-all"
+                        style={{
+                          background: selectedReplacement === p._id ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.04)',
+                          border: selectedReplacement === p._id ? '1px solid rgba(99,102,241,0.4)' : '1px solid #1E1E2A',
+                          color: selectedReplacement === p._id ? '#818CF8' : '#8B8B9E',
+                        }}>
+                        {p.name}
+                        <p className="text-[10px] font-normal mt-0.5" style={{ color: selectedReplacement === p._id ? 'rgba(129,140,248,0.6)' : '#3A3A52' }}>
+                          {p.gender === 'male' ? '♂ Male' : '♀ Female'}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-xl p-3 text-[12px]" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#F87171' }}>
+                  No 3rd place team available. Please manually reshuffle the 2nd place team before advancing.
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                <button onClick={() => { setConflict(null); setSelectedReplacement(''); }}
+                  className="btn-secondary flex-1 py-2.5">
+                  Cancel
+                </button>
+                {conflict.rank3Team && (
+                  <button onClick={handleResolveConflict}
+                    disabled={!selectedReplacement}
+                    className="btn-primary flex-1 py-2.5"
+                    style={{ opacity: selectedReplacement ? 1 : 0.4 }}>
+                    Confirm & Advance
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

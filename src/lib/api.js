@@ -190,3 +190,14 @@ export const reshuffleTeams = async (teamAId, teamBId, playerFromA, playerFromB)
   invalidateCache('/matches');
   return r;
 };
+
+// Resolve common player conflict before advancing
+export const resolveConflict = async (matchType, round, rank2TeamId, removePlayerId, addPlayerId) => {
+  const result = await apiFetch('/matches/resolve-conflict', {
+    method: 'POST',
+    body: JSON.stringify({ matchType, round, rank2TeamId, removePlayerId, addPlayerId }),
+  });
+  invalidateCache('/matches');
+  invalidateCache('/teams');
+  return result;
+};
