@@ -15,8 +15,11 @@ import { useRouter } from 'next/navigation';
 function SearchablePlayerSelect({ players, value, onChange, placeholder }) {
   const [query, setQuery]       = useState('');
   const [open, setOpen]         = useState(false);
+  const [mounted, setMounted]   = useState(false);
   const containerRef            = useRef(null);
   const [dropdownStyle, setDropdownStyle] = useState({});
+
+  useEffect(() => { setMounted(true); }, []);
 
   const selected = players.find(p => p._id === value);
   const filtered = players.filter(p =>
@@ -83,7 +86,7 @@ function SearchablePlayerSelect({ players, value, onChange, placeholder }) {
       </div>
 
       {/* Dropdown — rendered via portal to escape overflow:hidden */}
-      {open && typeof window !== 'undefined' && createPortal(
+      {open && mounted && createPortal(
         <div style={{
           ...dropdownStyle,
           background: '#16161E',
