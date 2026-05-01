@@ -1,5 +1,6 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
 
 const CONFIG = {
@@ -10,7 +11,12 @@ const CONFIG = {
 };
 
 export default function Modal({ isOpen, onClose, onConfirm, title, message, type = 'confirm' }) {
-  // Lock body scroll when modal is open so it always appears centered on screen
+  const [mounted, setMounted] = useState(false);
+
+  // Only render portal on client
+  useEffect(() => { setMounted(true); }, []);
+
+  // Lock body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -20,27 +26,34 @@ export default function Modal({ isOpen, onClose, onConfirm, title, message, type
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
+
   const { icon: Icon, color } = CONFIG[type] || CONFIG.confirm;
 
-  return (
+  const modal = (
     <div
       style={{
         position: 'fixed',
         top: 0, left: 0, right: 0, bottom: 0,
-        zIndex: 9999,
+        zIndex: 99999,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '16px',
         background: 'rgba(0,0,0,0.75)',
         backdropFilter: 'blur(4px)',
+        overflowY: 'auto',
       }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
       <div
         className="w-full max-w-sm rounded-xl p-6 relative animate-fade-in"
-        style={{ background: '#16161E', border: '1px solid #2A2A3A', boxShadow: '0 24px 64px rgba(0,0,0,0.6)' }}
+        style={{
+          background: '#16161E',
+          border: '1px solid #2A2A3A',
+          boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
+          margin: 'auto',
+        }}
       >
         <button
           onClick={onClose}
@@ -73,4 +86,6 @@ export default function Modal({ isOpen, onClose, onConfirm, title, message, type
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 }

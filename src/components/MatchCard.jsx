@@ -1,20 +1,49 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { User, Users, HeartHandshake, Trophy, Play, Crown, Target, X } from 'lucide-react';
 import MatchTimer from './MatchTimer';
 
 /* ── Inline Modal ─────────────────────────────────── */
 function InlineModal({ isOpen, onClose, title, children }) {
-  if (!isOpen) return null;
-  return (
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
+  if (!isOpen || !mounted) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(6,11,24,0.85)', backdropFilter: 'blur(8px)' }}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 99999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px',
+        background: 'rgba(6,11,24,0.85)',
+        backdropFilter: 'blur(8px)',
+        overflowY: 'auto',
+      }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
       <div
         className="w-full max-w-sm rounded-2xl overflow-hidden animate-fade-in"
-        style={{ background: '#16161E', border: '1px solid rgba(201,168,76,0.2)', boxShadow: '0 24px 64px rgba(0,0,0,0.6)' }}
+        style={{
+          background: '#16161E',
+          border: '1px solid rgba(201,168,76,0.2)',
+          boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
+          margin: 'auto',
+        }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4"
