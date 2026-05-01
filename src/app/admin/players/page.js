@@ -115,62 +115,65 @@ export default function PlayersPage() {
           </div>
         </div>
 
-        {loading ? (
-          <div className="p-5 space-y-2">
-            {[1,2,3].map(i => <div key={i} className="skeleton h-14 rounded-lg" />)}
-          </div>
-        ) : players.length === 0 ? (
-          <div className="py-14 text-center">
-            <Users size={28} className="mx-auto mb-3" style={{ color: '#2A2A3A' }} />
-            <p className="text-[13px] font-medium" style={{ color: '#4A4A5E' }}>No players yet</p>
-            <p className="text-[11px] mt-1" style={{ color: '#2A2A3A' }}>Add your first player using the form above</p>
-          </div>
-        ) : (
-          <div>
-            {players.map((p, idx) => (
-              <div key={p._id} className="group flex items-center gap-4 px-5 py-3.5 transition-colors"
-                style={{ borderBottom: '1px solid #1E1E2A' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                <span className="text-[11px] font-medium w-5 text-center flex-shrink-0 tabular-nums" style={{ color: '#2A2A3A' }}>{idx + 1}</span>
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-[13px] font-bold"
-                  style={{
-                    background: p.gender === 'male' ? 'linear-gradient(135deg, #1d4ed8, #3B82F6)' : 'linear-gradient(135deg, #9d174d, #ec4899)',
-                    color: '#fff',
-                  }}>
-                  {p.name.charAt(0).toUpperCase()}
+        {/* Scrollable player list — fixed height so page doesn't scroll */}
+        <div style={{ maxHeight: '420px', overflowY: 'auto' }}>
+          {loading ? (
+            <div className="p-5 space-y-2">
+              {[1,2,3].map(i => <div key={i} className="skeleton h-14 rounded-lg" />)}
+            </div>
+          ) : players.length === 0 ? (
+            <div className="py-14 text-center">
+              <Users size={28} className="mx-auto mb-3" style={{ color: '#2A2A3A' }} />
+              <p className="text-[13px] font-medium" style={{ color: '#4A4A5E' }}>No players yet</p>
+              <p className="text-[11px] mt-1" style={{ color: '#2A2A3A' }}>Add your first player using the form above</p>
+            </div>
+          ) : (
+            <div>
+              {players.map((p, idx) => (
+                <div key={p._id} className="group flex items-center gap-4 px-5 py-3.5 transition-colors"
+                  style={{ borderBottom: '1px solid #1E1E2A' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <span className="text-[11px] font-medium w-5 text-center flex-shrink-0 tabular-nums" style={{ color: '#2A2A3A' }}>{idx + 1}</span>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-[13px] font-bold"
+                    style={{
+                      background: p.gender === 'male' ? 'linear-gradient(135deg, #1d4ed8, #3B82F6)' : 'linear-gradient(135deg, #9d174d, #ec4899)',
+                      color: '#fff',
+                    }}>
+                    {p.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-semibold truncate" style={{ color: '#F4F4F6' }}>{p.name}</p>
+                  </div>
+                  <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0"
+                    style={{
+                      background: p.gender === 'male' ? 'rgba(59,130,246,0.1)' : 'rgba(236,72,153,0.1)',
+                      color: p.gender === 'male' ? '#93c5fd' : '#f9a8d4',
+                      border: `1px solid ${p.gender === 'male' ? 'rgba(59,130,246,0.2)' : 'rgba(236,72,153,0.2)'}`,
+                    }}>
+                    {p.gender === 'male' ? '♂ Male' : '♀ Female'}
+                  </span>
+                  <div className="flex items-center gap-1.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => { setEditing(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                      className="p-2 rounded-lg transition-all"
+                      style={{ color: '#818CF8', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.15)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.18)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.08)'}>
+                      <Pencil size={13} />
+                    </button>
+                    <button onClick={() => delPlayer(p._id)}
+                      className="p-2 rounded-lg transition-all"
+                      style={{ color: '#F87171', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.18)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}>
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold truncate" style={{ color: '#F4F4F6' }}>{p.name}</p>
-                </div>
-                <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0"
-                  style={{
-                    background: p.gender === 'male' ? 'rgba(59,130,246,0.1)' : 'rgba(236,72,153,0.1)',
-                    color: p.gender === 'male' ? '#93c5fd' : '#f9a8d4',
-                    border: `1px solid ${p.gender === 'male' ? 'rgba(59,130,246,0.2)' : 'rgba(236,72,153,0.2)'}`,
-                  }}>
-                  {p.gender === 'male' ? '♂ Male' : '♀ Female'}
-                </span>
-                <div className="flex items-center gap-1.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => { setEditing(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                    className="p-2 rounded-lg transition-all"
-                    style={{ color: '#818CF8', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.15)' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.18)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.08)'}>
-                    <Pencil size={13} />
-                  </button>
-                  <button onClick={() => delPlayer(p._id)}
-                    className="p-2 rounded-lg transition-all"
-                    style={{ color: '#F87171', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.18)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}>
-                    <Trash2 size={13} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <Modal isOpen={modal.isOpen} type={modal.type} title={modal.title} message={modal.message} onConfirm={modal.onConfirm} onClose={closeModal} />

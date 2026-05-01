@@ -1,4 +1,5 @@
 'use client';
+import { useEffect } from 'react';
 import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
 
 const CONFIG = {
@@ -9,18 +10,37 @@ const CONFIG = {
 };
 
 export default function Modal({ isOpen, onClose, onConfirm, title, message, type = 'confirm' }) {
+  // Lock body scroll when modal is open so it always appears centered on screen
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
   if (!isOpen) return null;
   const { icon: Icon, color } = CONFIG[type] || CONFIG.confirm;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.7)' }}
+      style={{
+        position: 'fixed',
+        top: 0, left: 0, right: 0, bottom: 0,
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px',
+        background: 'rgba(0,0,0,0.75)',
+        backdropFilter: 'blur(4px)',
+      }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
       <div
         className="w-full max-w-sm rounded-xl p-6 relative animate-fade-in"
-        style={{ background: '#16161E', border: '1px solid #2A2A3A' }}
+        style={{ background: '#16161E', border: '1px solid #2A2A3A', boxShadow: '0 24px 64px rgba(0,0,0,0.6)' }}
       >
         <button
           onClick={onClose}
@@ -33,7 +53,8 @@ export default function Modal({ isOpen, onClose, onConfirm, title, message, type
         </button>
 
         <div className="flex flex-col items-center text-center">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid #2A2A3A' }}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid #2A2A3A' }}>
             <Icon size={20} style={{ color }} />
           </div>
           <h3 className="text-[15px] font-bold mb-1.5" style={{ color: '#F4F4F6' }}>{title}</h3>
