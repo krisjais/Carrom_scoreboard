@@ -7,8 +7,111 @@ import {
 } from '@/lib/api';
 import MatchCard from '@/components/MatchCard';
 import Modal from '@/components/Modal';
-import { Trophy, Trash2, Swords, Users, UserPlus, X, Play, ArrowLeftRight, AlertTriangle } from 'lucide-react';
+import { Trophy, Trash2, Swords, Users, UserPlus, X, Play, ArrowLeftRight, AlertTriangle, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+
+// ── Searchable player picker ──────────────────────────
+function SearchablePlayerSelect({ players, value, onChange, placeholder }) {
+  const [query, setQuery] = useState('');
+  const [open, setOpen]   = useState(false);
+
+  const selected = players.find(p => p._id === value);
+  const filtered = players.filter(p =>
+    p.name.toLowerCase().includes(query.toLowerCase())
+  );
+
+  return (
+    <div style={{ position: 'relative' }}>
+      {/* Search input */}
+      <div style={{ position: 'relative' }}>
+        <Search size={13} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#4A4A5E', pointerEvents: 'none' }} />
+        <input
+          type="text"
+          className="input-field"
+          style={{ paddingLeft: '34px', paddingRight: selected ? '80px' : '12px' }}
+          placeholder={placeholder || 'Search player...'}
+          value={open ? query : (selected ? selected.name : '')}
+          onChange={e => { setQuery(e.target.value); setOpen(true); }}
+          onFocus={() => { setOpen(true); setQuery(''); }}
+          onBlur={() => setTimeout(() => setOpen(false), 150)}
+          autoComplete="off"
+        />
+        {selected && !open && (
+          <span
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+            style={{
+              background: selected.gender === 'male' ? 'rgba(59,130,246,0.1)' : 'rgba(236,72,153,0.1)',
+              color: selected.gender === 'male' ? '#93c5fd' : '#f9a8d4',
+              border: `1px solid ${selected.gender === 'male' ? 'rgba(59,130,246,0.2)' : 'rgba(236,72,153,0.2)'}`,
+            }}>
+            {selected.gender === 'male' ? '♂' : '♀'}
+          </span>
+        )}
+        {selected && (
+          <button
+            type="button"
+            onClick={() => { onChange(''); setQuery(''); }}
+            style={{ position: 'absolute', right: selected ? '36px' : '8px', top: '50%', transform: 'translateY(-50%)', color: '#4A4A5E', background: 'none', border: 'none', cursor: 'pointer', padding: '2px' }}
+            onMouseEnter={e => e.currentTarget.style.color = '#F87171'}
+            onMouseLeave={e => e.currentTarget.style.color = '#4A4A5E'}
+          >
+            <X size={13} />
+          </button>
+        )}
+      </div>
+
+      {/* Dropdown */}
+      {open && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100,
+          background: '#16161E', border: '1px solid #2A2A3A',
+          borderRadius: '10px', marginTop: '4px',
+          maxHeight: '220px', overflowY: 'auto',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+        }}>
+          {filtered.length === 0 ? (
+            <div className="px-4 py-3 text-[12px]" style={{ color: '#4A4A5E' }}>No players found</div>
+          ) : (
+            filtered.map(p => (
+              <button
+                key={p._id}
+                type="button"
+                onMouseDown={() => { onChange(p._id); setQuery(''); setOpen(false); }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors"
+                style={{
+                  background: value === p._id ? 'rgba(99,102,241,0.1)' : 'transparent',
+                  border: 'none', cursor: 'pointer',
+                }}
+                onMouseEnter={e => { if (value !== p._id) e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+                onMouseLeave={e => { if (value !== p._id) e.currentTarget.style.background = 'transparent'; }}
+              >
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+                  style={{
+                    background: p.gender === 'male' ? 'linear-gradient(135deg, #1d4ed8, #3B82F6)' : 'linear-gradient(135deg, #9d174d, #ec4899)',
+                    color: '#fff',
+                  }}>
+                  {p.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold truncate" style={{ color: value === p._id ? '#818CF8' : '#F4F4F6' }}>
+                    {p.name}
+                  </p>
+                </div>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+                  style={{
+                    background: p.gender === 'male' ? 'rgba(59,130,246,0.1)' : 'rgba(236,72,153,0.1)',
+                    color: p.gender === 'male' ? '#93c5fd' : '#f9a8d4',
+                  }}>
+                  {p.gender === 'male' ? '♂ Male' : '♀ Female'}
+                </span>
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function MatchesPage() {
   const [matches, setMatches]         = useState([]);
@@ -245,24 +348,24 @@ export default function MatchesPage() {
                     style={{ color: '#4A4A5E' }}>
                     {filter === 'mixed' ? 'Male Player' : 'Player 1'}
                   </label>
-                  <select value={playerA} onChange={e => setPlayerA(e.target.value)} className="input-field" required>
-                    <option value="">Select player...</option>
-                    {availableA.map(p => (
-                      <option key={p._id} value={p._id}>{p.name} ({p.gender})</option>
-                    ))}
-                  </select>
+                  <SearchablePlayerSelect
+                    players={availableA}
+                    value={playerA}
+                    onChange={setPlayerA}
+                    placeholder={`Search ${filter === 'mixed' ? 'male' : ''} player...`}
+                  />
                 </div>
                 <div>
                   <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
                     style={{ color: '#4A4A5E' }}>
                     {filter === 'mixed' ? 'Female Player' : 'Player 2'}
                   </label>
-                  <select value={playerB} onChange={e => setPlayerB(e.target.value)} className="input-field" required>
-                    <option value="">Select player...</option>
-                    {availableB.map(p => (
-                      <option key={p._id} value={p._id}>{p.name} ({p.gender})</option>
-                    ))}
-                  </select>
+                  <SearchablePlayerSelect
+                    players={availableB}
+                    value={playerB}
+                    onChange={setPlayerB}
+                    placeholder={`Search ${filter === 'mixed' ? 'female' : ''} player...`}
+                  />
                 </div>
               </div>
               <button type="submit" className="btn-primary flex items-center gap-2 py-2.5 px-6">
