@@ -37,6 +37,12 @@ async function apiFetch(endpoint, options = {}) {
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   });
+
+  // 409 = conflict — return the data instead of throwing
+  if (res.status === 409) {
+    return res.json();
+  }
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(err.error || 'API request failed');
