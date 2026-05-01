@@ -185,7 +185,6 @@ function AdminActions({ match, onUpdateResult, nameA, nameB }) {
 
   function handleBoardSubmit() {
     setBoardOpen(false);
-    // Calculate remaining seconds from the timer
     const DURATIONS = { single: 10 * 60, double: 15 * 60, mixed: 15 * 60 };
     const total     = DURATIONS[match.matchType] || 600;
     const started   = match.startedAt ? new Date(match.startedAt).getTime() : Date.now();
@@ -194,8 +193,8 @@ function AdminActions({ match, onUpdateResult, nameA, nameB }) {
 
     onUpdateResult(match._id, {
       type: 'board',
-      coinsLeftA:      Number(coinsLeftA),
-      coinsLeftB:      Number(coinsLeftB),
+      coinsPocketedA:  Number(coinsLeftA),  // now means "pocketed by A"
+      coinsPocketedB:  Number(coinsLeftB),  // now means "pocketed by B"
       queenCoveredBy:  queen === 'none' ? null : queen,
       foulsA:          Number(foulsA),
       foulsB:          Number(foulsB),
@@ -275,25 +274,23 @@ function AdminActions({ match, onUpdateResult, nameA, nameB }) {
       {/* ══ BOARD RESULT MODAL ══ */}
       <InlineModal isOpen={boardOpen} onClose={() => setBoardOpen(false)} title={`Board ${(match.boards?.length || 0) + 1} Result`}>
         <div className="space-y-4">
-          {/* Coins left */}
+          {/* Coins pocketed */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#4A4A5E' }}>
-                {nameA.split(' ')[0]}'s coins left
+                Coins pocketed by {nameA.split(' ')[0]}
               </label>
-              <input type="number" min="0" max="9" value={coinsLeftA}
+              <input type="number" min="0" max="18" value={coinsLeftA}
                 onChange={e => setCoinsLeftA(e.target.value)}
                 className="input-field text-center text-[15px] font-bold" />
-              <p className="text-[10px] mt-1" style={{ color: '#3D5A80' }}>Scored by {nameB.split(' ')[0]}</p>
             </div>
             <div>
               <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#4A4A5E' }}>
-                {nameB.split(' ')[0]}'s coins left
+                Coins pocketed by {nameB.split(' ')[0]}
               </label>
-              <input type="number" min="0" max="9" value={coinsLeftB}
+              <input type="number" min="0" max="18" value={coinsLeftB}
                 onChange={e => setCoinsLeftB(e.target.value)}
                 className="input-field text-center text-[15px] font-bold" />
-              <p className="text-[10px] mt-1" style={{ color: '#3D5A80' }}>Scored by {nameA.split(' ')[0]}</p>
             </div>
           </div>
 
@@ -346,12 +343,12 @@ function AdminActions({ match, onUpdateResult, nameA, nameB }) {
             <p className="font-semibold mb-2" style={{ color: '#4A4A5E' }}>Score preview (before time bonus)</p>
             <div className="space-y-1">
               <div className="flex justify-between">
-                <span style={{ color: '#8B8B9E' }}>{nameA.split(' ')[0]} coins scored:</span>
-                <span style={{ color: '#F4F4F6' }}>{Number(coinsLeftB)} × 10 = <strong>{Number(coinsLeftB) * 10}</strong></span>
+                <span style={{ color: '#8B8B9E' }}>{nameA.split(' ')[0]} pocketed:</span>
+                <span style={{ color: '#F4F4F6' }}>{Number(coinsLeftA)} × 10 = <strong>{Number(coinsLeftA) * 10}</strong></span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: '#8B8B9E' }}>{nameB.split(' ')[0]} coins scored:</span>
-                <span style={{ color: '#F4F4F6' }}>{Number(coinsLeftA)} × 10 = <strong>{Number(coinsLeftA) * 10}</strong></span>
+                <span style={{ color: '#8B8B9E' }}>{nameB.split(' ')[0]} pocketed:</span>
+                <span style={{ color: '#F4F4F6' }}>{Number(coinsLeftB)} × 10 = <strong>{Number(coinsLeftB) * 10}</strong></span>
               </div>
               {queen !== 'none' && (
                 <div className="flex justify-between">
@@ -368,8 +365,8 @@ function AdminActions({ match, onUpdateResult, nameA, nameB }) {
                 </div>
               )}
               <div className="pt-1 mt-1 flex justify-between font-bold" style={{ borderTop: '1px solid #1E1E2A', color: '#F4F4F6' }}>
-                <span>{nameA.split(' ')[0]}: {Math.max(0, Number(coinsLeftB) * 10 + (queen === 'A' ? 50 : 0) - Number(foulsA) * 10)} pts</span>
-                <span>{nameB.split(' ')[0]}: {Math.max(0, Number(coinsLeftA) * 10 + (queen === 'B' ? 50 : 0) - Number(foulsB) * 10)} pts</span>
+                <span>{nameA.split(' ')[0]}: {Math.max(0, Number(coinsLeftA) * 10 + (queen === 'A' ? 50 : 0) - Number(foulsA) * 10)} pts</span>
+                <span>{nameB.split(' ')[0]}: {Math.max(0, Number(coinsLeftB) * 10 + (queen === 'B' ? 50 : 0) - Number(foulsB) * 10)} pts</span>
               </div>
               <p className="text-[10px] mt-1" style={{ color: '#3A3A52' }}>
                 + 20 pts/min remaining will be added to the board winner (proportional for partial minutes)
