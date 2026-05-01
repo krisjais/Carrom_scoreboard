@@ -153,7 +153,7 @@ export default function MatchCard({ match, onUpdateResult, showActions = false }
         <div className="mt-3 space-y-2">
           <MatchTimer
             matchType={match.matchType}
-            startedAt={match.startedAt}
+            boardStartedAt={match.boardStartedAt}
             status={match.status}
           />
           <div>
@@ -203,7 +203,24 @@ function AdminActions({ match, onUpdateResult, nameA, nameB }) {
   const [queen, setQueen]           = useState('none');
   const [foulsA, setFoulsA]         = useState(0);
   const [foulsB, setFoulsB]         = useState(0);
-  const [capturedRemaining, setCapturedRemaining] = useState(0); // seconds captured when board opens
+
+  // Remaining seconds shown in preview (live countdown from boardStartedAt)
+  const [previewRemaining, setPreviewRemaining] = useState(0);
+
+  // Keep preview timer in sync
+  useEffect(() => {
+    if (match.status !== 'live' || !match.boardStartedAt) return;
+    const DURATIONS = { single: 10 * 60, double: 15 * 60, mixed: 15 * 60 };
+    const total   = DURATIONS[match.matchType] || 600;
+    const started = new Date(match.boardStartedAt).getTime();
+    function tick() {
+      const elapsed = Math.floor((Date.now() - started) / 1000);
+      setPreviewRemaining(Math.max(0, total - elapsed));
+    }
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [match.boardStartedAt, match.matchType, match.status]);
 
   // Override state
   const [overScoreA, setOverScoreA] = useState(match.scoreA || 0);
@@ -216,19 +233,16 @@ function AdminActions({ match, onUpdateResult, nameA, nameB }) {
 
   function handleBoardSubmit() {
     setBoardOpen(false);
-    // Use the time captured when the board ended (when Submit button was clicked)
-    // NOT recalculated now (which would be later and give less time)
     onUpdateResult(match._id, {
-      type: 'board',
-      coinsPocketedA:  Number(coinsLeftA),
-      coinsPocketedB:  Number(coinsLeftB),
-      queenCoveredBy:  queen === 'none' ? null : queen,
-      foulsA:          Number(foulsA),
-      foulsB:          Number(foulsB),
-      remainingSeconds: capturedRemaining,
+      type:           'board',
+      coinsPocketedA: Number(coinsLeftA),
+      coinsPocketedB: Number(coinsLeftB),
+      queenCoveredBy: queen === 'none' ? null : queen,
+      foulsA:         Number(foulsA),
+      foulsB:         Number(foulsB),
+      // remainingSeconds is now computed server-side from boardStartedAt
     });
     setCoinsLeftA(0); setCoinsLeftB(0); setQueen('none'); setFoulsA(0); setFoulsB(0);
-    setCapturedRemaining(0);
   }
 
   function handleOverride(winnerId) {
@@ -249,17 +263,7 @@ function AdminActions({ match, onUpdateResult, nameA, nameB }) {
       {/* ── Live actions ── */}
       {match.status === 'live' && (
         <div className="space-y-2">
-          <button onClick={() => {
-            // Capture remaining seconds the moment the board ends (when button is clicked)
-            const DURATIONS = { single: 10 * 60, double: 15 * 60, mixed: 15 * 60 };
-            const total     = DURATIONS[match.matchType] || 600;
-            const started   = match.startedAt ? new Date(match.startedAt).getTime() : Date.now();
-            const elapsed   = Math.floor((Date.now() - started) / 1000);
-            const remaining = Math.max(0, total - elapsed);
-            console.log('[Board End] startedAt:', match.startedAt, '| elapsed:', elapsed, 's | remaining:', remaining, 's (', Math.floor(remaining/60), 'min', remaining%60, 's)');
-            setCapturedRemaining(remaining);
-            setBoardOpen(true);
-          }}
+          <button onClick={() => setBoardOpen(true)}
             className="btn-primary w-full text-[12px] flex items-center justify-center gap-2 py-2.5">
             <Target size={13} /> Submit Board Result
           </button>
@@ -378,7 +382,7 @@ function AdminActions({ match, onUpdateResult, nameA, nameB }) {
 
           {/* Preview score */}
           {(() => {
-            const timeBonus   = Math.floor(capturedRemaining / 60) * 20;
+            const timeBonus   = Math.floor(previewRemaining / 60) * 20;
             const rawA        = Math.max(0, Number(coinsLeftA) * 10 + (queen === 'A' ? 50 : 0) - Number(foulsA) * 10);
             const rawB        = Math.max(0, Number(coinsLeftB) * 10 + (queen === 'B' ? 50 : 0) - Number(foulsB) * 10);
             const preWinner   = rawA > rawB ? 'A' : rawB > rawA ? 'B' : null;
@@ -411,9 +415,9 @@ function AdminActions({ match, onUpdateResult, nameA, nameB }) {
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span style={{ color: '#8B8B9E' }}>⏱ Time remaining at board end:</span>
+                    <span style={{ color: '#8B8B9E' }}>⏱ Board time remaining:</span>
                     <span style={{ color: '#4ADE80', fontWeight: 'bold' }}>
-                      {Math.floor(capturedRemaining / 60)}m {capturedRemaining % 60}s → +{timeBonus} pts to winner
+                      {Math.floor(previewRemaining / 60)}m {previewRemaining % 60}s → +{timeBonus} pts to winner
                     </span>
                   </div>
                   <div className="pt-1.5 mt-1 flex justify-between font-bold text-[12px]" style={{ borderTop: '1px solid #1E1E2A', color: '#F4F4F6' }}>

@@ -2,21 +2,21 @@
 import { useEffect, useState } from 'react';
 import { Timer } from 'lucide-react';
 
-// matchType: 'single' = 10 min, 'double'/'mixed' = 15 min
-const DURATIONS = {
-  single: 10 * 60,  // 600 seconds
-  double: 15 * 60,  // 900 seconds
+// Per-board duration (each board gets a fresh timer)
+const BOARD_DURATION = {
+  single: 10 * 60,   // 600 seconds
+  double: 15 * 60,   // 900 seconds
   mixed:  15 * 60,
 };
 
-export default function MatchTimer({ matchType, startedAt, status }) {
+export default function MatchTimer({ matchType, boardStartedAt, status }) {
   const [secondsLeft, setSecondsLeft] = useState(null);
 
   useEffect(() => {
-    if (status !== 'live' || !startedAt) return;
+    if (status !== 'live' || !boardStartedAt) return;
 
-    const total    = DURATIONS[matchType] || 600;
-    const started  = new Date(startedAt).getTime();
+    const total   = BOARD_DURATION[matchType] || 600;
+    const started = new Date(boardStartedAt).getTime();
 
     function tick() {
       const elapsed = Math.floor((Date.now() - started) / 1000);
@@ -24,29 +24,25 @@ export default function MatchTimer({ matchType, startedAt, status }) {
       setSecondsLeft(left);
     }
 
-    tick(); // immediate
+    tick();
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
-  }, [matchType, startedAt, status]);
+  }, [matchType, boardStartedAt, status]);
 
   if (status !== 'live' || secondsLeft === null) return null;
 
-  const mins = Math.floor(secondsLeft / 60);
-  const secs = secondsLeft % 60;
-  const pct  = secondsLeft / (DURATIONS[matchType] || 600);
-
-  // Color: green → amber → red
-  const color = pct > 0.5 ? '#4ADE80' : pct > 0.2 ? '#F59E0B' : '#F87171';
+  const total    = BOARD_DURATION[matchType] || 600;
+  const mins     = Math.floor(secondsLeft / 60);
+  const secs     = secondsLeft % 60;
+  const pct      = secondsLeft / total;
+  const color    = pct > 0.5 ? '#4ADE80' : pct > 0.2 ? '#F59E0B' : '#F87171';
   const isUrgent = pct <= 0.2;
   const isOver   = secondsLeft === 0;
 
   return (
     <div
       className="flex items-center gap-2 px-3 py-2 rounded-xl"
-      style={{
-        background: `${color}10`,
-        border: `1px solid ${color}30`,
-      }}
+      style={{ background: `${color}10`, border: `1px solid ${color}30` }}
     >
       <Timer
         size={14}
