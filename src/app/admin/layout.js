@@ -12,7 +12,7 @@ export default function AdminLayout({ children }) {
     <div style={{ minHeight: '100vh', background: '#080F1C', display: 'flex' }}>
       <AdminSidebar />
       <div className="admin-spacer" style={{ flexShrink: 0, width: '300px', display: 'none' }} />
-      <main style={{ flex: 1, minWidth: 0, padding: '32px 40px 60px' }}>
+      <main style={{ flex: 1, minWidth: 0, padding: '32px 40px 60px', overflowX: 'hidden' }}>
         {children}
       </main>
       <style>{`
