@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
 
@@ -11,26 +11,19 @@ const CONFIG = {
 };
 
 export default function Modal({ isOpen, onClose, onConfirm, title, message, type = 'confirm' }) {
-  const [mounted, setMounted] = useState(false);
-
-  // Only render portal on client
-  useEffect(() => { setMounted(true); }, []);
-
-  // Lock body scroll when modal is open
+  // Lock body scroll when open
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    if (typeof window === 'undefined') return;
+    document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  if (!isOpen || !mounted) return null;
+  // Don't render on server or when closed
+  if (typeof window === 'undefined' || !isOpen) return null;
 
   const { icon: Icon, color } = CONFIG[type] || CONFIG.confirm;
 
-  const modal = (
+  return createPortal(
     <div
       style={{
         position: 'fixed',
@@ -84,8 +77,7 @@ export default function Modal({ isOpen, onClose, onConfirm, title, message, type
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
-
-  return createPortal(modal, document.body);
 }

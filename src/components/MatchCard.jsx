@@ -6,19 +6,13 @@ import MatchTimer from './MatchTimer';
 
 /* ── Inline Modal ─────────────────────────────────── */
 function InlineModal({ isOpen, onClose, title, children }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
-
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    if (typeof window === 'undefined') return;
+    document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  if (!isOpen || !mounted) return null;
+  if (typeof window === 'undefined' || !isOpen) return null;
 
   return createPortal(
     <div
