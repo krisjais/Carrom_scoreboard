@@ -231,6 +231,14 @@ export default function MatchesPage() {
               </div>
             </div>
             <form onSubmit={handleAddTeam} className="p-5">
+              {/* Show ineligible count */}
+              {ineligiblePlayers.length > 0 && (
+                <div className="mb-4 px-3 py-2.5 rounded-lg flex items-center gap-2 text-[11px]"
+                  style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.15)', color: '#F87171' }}>
+                  <span>⚠️</span>
+                  {ineligiblePlayers.length} player{ineligiblePlayers.length > 1 ? 's' : ''} hidden — already played 3 matches ({ineligiblePlayers.map(p => p.name).join(', ')})
+                </div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                 <div>
                   <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
