@@ -142,17 +142,18 @@ export default function MatchesPage() {
   const liveCount = matches.filter(m => m.status === 'live').length;
   const doneCount = matches.filter(m => m.status === 'completed').length;
 
-  // Players already in a team for this category
-  const pairedIds = new Set(teams.flatMap(t => t.players?.map(p => p._id || p) || []));
+  // A player CAN be in multiple teams — no pairedIds restriction
+  // BUT players who have played 3 matches are ineligible (shown greyed out)
+  // Only filter by gender for mixed doubles, and prevent same player in both slots
+  const eligiblePlayers = players.filter(p => p.eligible !== false); // eligible = true or undefined
+  const ineligiblePlayers = players.filter(p => p.eligible === false);
 
-  // Filter available players for doubles/mixed
-  const availablePlayers = players.filter(p => !pairedIds.has(p._id));
   const availableA = filter === 'mixed'
-    ? availablePlayers.filter(p => p.gender === 'male')
-    : availablePlayers;
+    ? eligiblePlayers.filter(p => p.gender === 'male')
+    : eligiblePlayers;
   const availableB = filter === 'mixed'
-    ? availablePlayers.filter(p => p.gender === 'female')
-    : availablePlayers.filter(p => p._id !== playerA);
+    ? eligiblePlayers.filter(p => p.gender === 'female')
+    : eligiblePlayers.filter(p => p._id !== playerA);
 
   const TYPES = [
     { value: 'single', label: 'Singles',        desc: 'Gender-based 1v1' },
