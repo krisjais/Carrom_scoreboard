@@ -267,7 +267,7 @@ function AdminActions({ match, onUpdateResult, nameA, nameB }) {
           <div className="rounded-lg p-3 text-[11px]" style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.15)' }}>
             <p className="font-semibold mb-1.5" style={{ color: '#C9A84C' }}>Scoring Rules</p>
             <div className="space-y-0.5 mb-2" style={{ color: '#6B8FAD' }}>
-              <p>🪙 Coin = <strong style={{ color: '#F4F4F6' }}>10 pts</strong> &nbsp;·&nbsp; 👑 Queen = <strong style={{ color: '#EF4444' }}>50 pts</strong> &nbsp;·&nbsp; ⏱ /min = <strong style={{ color: '#4ADE80' }}>20 pts</strong></p>
+              <p>🪙 Coin = <strong style={{ color: '#F4F4F6' }}>10 pts</strong> &nbsp;·&nbsp; 👑 Queen = <strong style={{ color: '#EF4444' }}>50 pts</strong> &nbsp;·&nbsp; ⏱ /whole min = <strong style={{ color: '#4ADE80' }}>20 pts</strong></p>
             </div>
             <div className="flex justify-between" style={{ color: '#6B8FAD' }}>
               <span>{nameA.split(' ')[0]}: {match.scoreA}pts · {match.boardsWonA}B</span>
@@ -378,7 +378,7 @@ function AdminActions({ match, onUpdateResult, nameA, nameB }) {
 
           {/* Preview score */}
           {(() => {
-            const timeBonus   = Math.round((capturedRemaining / 60) * 20);
+            const timeBonus   = Math.floor(capturedRemaining / 60) * 20;
             const rawA        = Math.max(0, Number(coinsLeftA) * 10 + (queen === 'A' ? 50 : 0) - Number(foulsA) * 10);
             const rawB        = Math.max(0, Number(coinsLeftB) * 10 + (queen === 'B' ? 50 : 0) - Number(foulsB) * 10);
             const preWinner   = rawA > rawB ? 'A' : rawB > rawA ? 'B' : null;
