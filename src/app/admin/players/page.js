@@ -53,7 +53,7 @@ export default function PlayersPage() {
   const femaleCount = players.filter(p => p.gender === 'female').length;
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px', overflowY: 'auto' }}>
+    <div className="space-y-5 animate-fade-in">
       {/* Header */}
       <div>
         <p className="text-[11px] uppercase tracking-widest font-semibold mb-1" style={{ color: '#4A4A5E' }}>Admin</p>
@@ -116,7 +116,7 @@ export default function PlayersPage() {
         </div>
 
         {/* Scrollable player list */}
-        <div style={{ overflowY: 'auto' }}>
+        <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
           {loading ? (
             <div className="p-5 space-y-2">
               {[1,2,3].map(i => <div key={i} className="skeleton h-14 rounded-lg" />)}

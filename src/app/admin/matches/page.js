@@ -282,7 +282,7 @@ export default function MatchesPage() {
   ];
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px', overflowY: 'auto' }}>
+    <div className="space-y-5 animate-fade-in">
       {/* Header */}
       <div>
         <p className="text-[11px] uppercase tracking-widest font-semibold mb-1" style={{ color: '#4A4A5E' }}>Admin</p>
@@ -334,7 +334,7 @@ export default function MatchesPage() {
       {filter !== 'single' && (
         <>
           {/* Add team form */}
-          <div className="glass-card overflow-hidden">
+          <div className="glass-card" style={{ overflow: 'visible' }}>
             <div className="px-5 py-4 flex items-center gap-3"
               style={{ borderBottom: '1px solid #1E1E2A', background: '#111118' }}>
               <div className="w-8 h-8 rounded-lg flex items-center justify-center"
