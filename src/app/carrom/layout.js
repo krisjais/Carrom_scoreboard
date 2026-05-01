@@ -21,7 +21,7 @@ export default function CarromLayout({ children }) {
       </main>
       <style>{`
         @media (min-width: 1024px) { .sidebar-spacer { display: block !important; } }
-        @media (max-width: 1023px) { main { padding: 24px 20px 100px !important; } }
+        @media (max-width: 1023px) { main { padding: 70px 16px 40px !important; } }
       `}</style>
     </div>
   );
