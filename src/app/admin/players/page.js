@@ -53,7 +53,7 @@ export default function PlayersPage() {
   const femaleCount = players.filter(p => p.gender === 'female').length;
 
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px' }}>
       {/* Header */}
       <div>
         <p className="text-[11px] uppercase tracking-widest font-semibold mb-1" style={{ color: '#4A4A5E' }}>Admin</p>
@@ -94,8 +94,8 @@ export default function PlayersPage() {
       </div>
 
       {/* Players list */}
-      <div className="glass-card overflow-hidden">
-        <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid #1E1E2A', background: '#111118' }}>
+      <div className="glass-card overflow-hidden" style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid #1E1E2A', background: '#111118', flexShrink: 0 }}>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)' }}>
               <Users size={14} style={{ color: '#818CF8' }} />
@@ -115,8 +115,8 @@ export default function PlayersPage() {
           </div>
         </div>
 
-        {/* Scrollable player list — fixed height so page doesn't scroll */}
-        <div style={{ maxHeight: '420px', overflowY: 'auto' }}>
+        {/* Scrollable player list — fills remaining space */}
+        <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
           {loading ? (
             <div className="p-5 space-y-2">
               {[1,2,3].map(i => <div key={i} className="skeleton h-14 rounded-lg" />)}

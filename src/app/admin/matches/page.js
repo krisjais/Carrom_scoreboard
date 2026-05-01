@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   getMatches, getPlayers, updateMatchResult, clearMatches, advanceMatches,
   getTeams, createTeam, deleteTeam, generateMatchesFromTeams, generateMatches,
@@ -12,79 +13,96 @@ import { useRouter } from 'next/navigation';
 
 // ── Searchable player picker ──────────────────────────
 function SearchablePlayerSelect({ players, value, onChange, placeholder }) {
-  const [query, setQuery] = useState('');
-  const [open, setOpen]   = useState(false);
+  const [query, setQuery]       = useState('');
+  const [open, setOpen]         = useState(false);
+  const containerRef            = useRef(null);
+  const [dropdownStyle, setDropdownStyle] = useState({});
 
   const selected = players.find(p => p._id === value);
   const filtered = players.filter(p =>
     p.name.toLowerCase().includes(query.toLowerCase())
   );
 
+  // Calculate dropdown position relative to viewport
+  function updateDropdownPos() {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    setDropdownStyle({
+      position: 'fixed',
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+      zIndex: 9999,
+    });
+  }
+
+  useEffect(() => {
+    if (open) updateDropdownPos();
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onScroll = () => updateDropdownPos();
+    window.addEventListener('scroll', onScroll, true);
+    return () => window.removeEventListener('scroll', onScroll, true);
+  }, [open]);
+
   return (
-    <div style={{ position: 'relative' }}>
-      {/* Search input */}
+    <div ref={containerRef} style={{ position: 'relative' }}>
+      {/* Input */}
       <div style={{ position: 'relative' }}>
         <Search size={13} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#4A4A5E', pointerEvents: 'none' }} />
         <input
           type="text"
           className="input-field"
-          style={{ paddingLeft: '34px', paddingRight: selected ? '80px' : '12px' }}
+          style={{ paddingLeft: '34px', paddingRight: selected ? '60px' : '12px' }}
           placeholder={placeholder || 'Search player...'}
           value={open ? query : (selected ? selected.name : '')}
-          onChange={e => { setQuery(e.target.value); setOpen(true); }}
-          onFocus={() => { setOpen(true); setQuery(''); }}
+          onChange={e => { setQuery(e.target.value); setOpen(true); updateDropdownPos(); }}
+          onFocus={() => { setOpen(true); setQuery(''); updateDropdownPos(); }}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           autoComplete="off"
         />
         {selected && !open && (
-          <span
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+          <span className="absolute right-8 top-1/2 -translate-y-1/2 text-[10px] font-semibold px-2 py-0.5 rounded-full"
             style={{
               background: selected.gender === 'male' ? 'rgba(59,130,246,0.1)' : 'rgba(236,72,153,0.1)',
               color: selected.gender === 'male' ? '#93c5fd' : '#f9a8d4',
-              border: `1px solid ${selected.gender === 'male' ? 'rgba(59,130,246,0.2)' : 'rgba(236,72,153,0.2)'}`,
             }}>
             {selected.gender === 'male' ? '♂' : '♀'}
           </span>
         )}
         {selected && (
-          <button
-            type="button"
-            onClick={() => { onChange(''); setQuery(''); }}
-            style={{ position: 'absolute', right: selected ? '36px' : '8px', top: '50%', transform: 'translateY(-50%)', color: '#4A4A5E', background: 'none', border: 'none', cursor: 'pointer', padding: '2px' }}
+          <button type="button" onClick={() => { onChange(''); setQuery(''); }}
+            style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#4A4A5E', background: 'none', border: 'none', cursor: 'pointer', padding: '2px' }}
             onMouseEnter={e => e.currentTarget.style.color = '#F87171'}
-            onMouseLeave={e => e.currentTarget.style.color = '#4A4A5E'}
-          >
+            onMouseLeave={e => e.currentTarget.style.color = '#4A4A5E'}>
             <X size={13} />
           </button>
         )}
       </div>
 
-      {/* Dropdown */}
-      {open && (
+      {/* Dropdown — rendered via portal to escape overflow:hidden */}
+      {open && typeof window !== 'undefined' && createPortal(
         <div style={{
-          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100,
-          background: '#16161E', border: '1px solid #2A2A3A',
-          borderRadius: '10px', marginTop: '4px',
-          maxHeight: '220px', overflowY: 'auto',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+          ...dropdownStyle,
+          background: '#16161E',
+          border: '1px solid #2A2A3A',
+          borderRadius: '10px',
+          maxHeight: '240px',
+          overflowY: 'auto',
+          boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
         }}>
           {filtered.length === 0 ? (
             <div className="px-4 py-3 text-[12px]" style={{ color: '#4A4A5E' }}>No players found</div>
           ) : (
             filtered.map(p => (
-              <button
-                key={p._id}
-                type="button"
+              <button key={p._id} type="button"
                 onMouseDown={() => { onChange(p._id); setQuery(''); setOpen(false); }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors"
-                style={{
-                  background: value === p._id ? 'rgba(99,102,241,0.1)' : 'transparent',
-                  border: 'none', cursor: 'pointer',
-                }}
+                style={{ background: value === p._id ? 'rgba(99,102,241,0.1)' : 'transparent', border: 'none', cursor: 'pointer' }}
                 onMouseEnter={e => { if (value !== p._id) e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
-                onMouseLeave={e => { if (value !== p._id) e.currentTarget.style.background = 'transparent'; }}
-              >
+                onMouseLeave={e => { if (value !== p._id) e.currentTarget.style.background = 'transparent'; }}>
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold flex-shrink-0"
                   style={{
                     background: p.gender === 'male' ? 'linear-gradient(135deg, #1d4ed8, #3B82F6)' : 'linear-gradient(135deg, #9d174d, #ec4899)',
@@ -92,22 +110,21 @@ function SearchablePlayerSelect({ players, value, onChange, placeholder }) {
                   }}>
                   {p.name.charAt(0).toUpperCase()}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold truncate" style={{ color: value === p._id ? '#818CF8' : '#F4F4F6' }}>
-                    {p.name}
-                  </p>
-                </div>
+                <p className="text-[13px] font-semibold flex-1 truncate text-left" style={{ color: value === p._id ? '#818CF8' : '#F4F4F6' }}>
+                  {p.name}
+                </p>
                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
                   style={{
                     background: p.gender === 'male' ? 'rgba(59,130,246,0.1)' : 'rgba(236,72,153,0.1)',
                     color: p.gender === 'male' ? '#93c5fd' : '#f9a8d4',
                   }}>
-                  {p.gender === 'male' ? '♂ Male' : '♀ Female'}
+                  {p.gender === 'male' ? '♂' : '♀'}
                 </span>
               </button>
             ))
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
@@ -265,7 +282,7 @@ export default function MatchesPage() {
   ];
 
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px' }}>
       {/* Header */}
       <div>
         <p className="text-[11px] uppercase tracking-widest font-semibold mb-1" style={{ color: '#4A4A5E' }}>Admin</p>
@@ -566,7 +583,8 @@ export default function MatchesPage() {
         </>
       )}
 
-      {/* Match list */}
+      {/* Match list — scrollable */}
+      <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[1,2,3,4].map(i => <div key={i} className="skeleton h-40 rounded-xl" />)}
@@ -604,6 +622,7 @@ export default function MatchesPage() {
           </p>
         </div>
       )}
+      </div>
 
       <Modal isOpen={modal.isOpen} type={modal.type} title={modal.title} message={modal.message}
         onConfirm={modal.onConfirm} onClose={closeModal} />
