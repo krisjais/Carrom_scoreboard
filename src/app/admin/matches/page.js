@@ -282,7 +282,7 @@ export default function MatchesPage() {
   ];
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px' }}>
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px', overflowY: 'auto' }}>
       {/* Header */}
       <div>
         <p className="text-[11px] uppercase tracking-widest font-semibold mb-1" style={{ color: '#4A4A5E' }}>Admin</p>
@@ -583,8 +583,7 @@ export default function MatchesPage() {
         </>
       )}
 
-      {/* Match list — scrollable */}
-      <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+      {/* Match list */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[1,2,3,4].map(i => <div key={i} className="skeleton h-40 rounded-xl" />)}
@@ -622,7 +621,6 @@ export default function MatchesPage() {
           </p>
         </div>
       )}
-      </div>
 
       <Modal isOpen={modal.isOpen} type={modal.type} title={modal.title} message={modal.message}
         onConfirm={modal.onConfirm} onClose={closeModal} />
